@@ -158,7 +158,7 @@ void TransportPublisherLink::onMessage(const ros::ConnectionPtr& conn, const boo
   }
 }
 
-void TransportPublisherLink::onRetryTimer(const ros::WallTimerEvent&)
+void TransportPublisherLink::onRetryTimer(const ros::SteadyTimerEvent&)
 {
   if (dropping_)
   {
@@ -274,6 +274,11 @@ void TransportPublisherLink::handleMessage(const ros::SerializedMessage& m, bool
 std::string TransportPublisherLink::getTransportType()
 {
   return connection_->getTransport()->getType();
+}
+
+std::string TransportPublisherLink::getTransportInfo()
+{
+  return connection_->getTransport()->getTransportInfo();
 }
 
 } // namespace rv

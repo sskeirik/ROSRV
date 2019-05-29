@@ -4,7 +4,7 @@
 #include "ros/common.h"
 #include "ros/subscriber_link.h"
 
-#include <boost/signals/connection.hpp>
+#include <boost/signals2/connection.hpp>
 
 namespace rv
 {
@@ -27,6 +27,7 @@ public:
   virtual void enqueueMessage(const ros::SerializedMessage& m, bool ser, bool nocopy);
   virtual void drop();
   virtual std::string getTransportType();
+  virtual std::string getTransportInfo();
 
 private:
   void onConnectionDropped(const ros::ConnectionPtr& conn);
@@ -39,7 +40,7 @@ private:
   bool header_written_;
 
   ros::ConnectionPtr connection_;
-  boost::signals::connection dropped_conn_;
+  boost::signals2::connection dropped_conn_;
 
   std::queue<ros::SerializedMessage> outbox_;
   boost::mutex outbox_mutex_;

@@ -15,8 +15,6 @@ typedef boost::weak_ptr<Subscription> SubscriptionWPtr;
 class Connection;
 typedef boost::shared_ptr<ros::Connection> ConnectionPtr;
 
-class WallTimerEvent;
-
 /**
  * \brief Handles a connection to a single publisher on a given topic.  Receives messages from a publisher
  * and hands them off to its parent Subscription
@@ -33,6 +31,7 @@ public:
   const ConnectionPtr& getConnection() { return connection_; }
 
   virtual std::string getTransportType();
+  virtual std::string getTransportInfo();
   virtual void drop();
 
 private:
@@ -48,7 +47,7 @@ private:
   void onMessageLength(const ros::ConnectionPtr& conn, const boost::shared_array<uint8_t>& buffer, uint32_t size, bool success);
   void onMessage(const ros::ConnectionPtr& conn, const boost::shared_array<uint8_t>& buffer, uint32_t size, bool success);
 
-  void onRetryTimer(const ros::WallTimerEvent&);
+  void onRetryTimer(const ros::SteadyTimerEvent&);
 
   ros::ConnectionPtr connection_;
 
