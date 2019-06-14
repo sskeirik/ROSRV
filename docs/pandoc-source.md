@@ -9,11 +9,11 @@ Introduction
 The purpose of this document is to -
 
  a) Provide a brief theoretical background behind three
-    distinct projects that are used in unison for Runtime Verification (RV) of
+    projects that are used in unison for Runtime Verification (RV) of
     ROS based application -
 
-    * [ROSRV](https://github.com/Formal-Systems-Laboratory/ROSRV/),
-    * [RV-Monitor](https://github.com/runtimeverification/rv-monitor) and
+    * [ROSRV](https://github.com/Formal-Systems-Laboratory/ROSRV/)
+    * [RV-Monitor](https://github.com/runtimeverification/rv-monitor)
     * [ROSMOP](https://github.com/Formal-Systems-Laboratory/rosmop)
 
  b) Discuss the *overall architecture* needed for RV of ROS applications using aforementioned tools.
@@ -41,7 +41,7 @@ as a fundamental principle for building reliable systems [@MOP2012].
 paper on MOP). At the core of MOP is the idea that all monitoring systems share
 certain functionality, mainly program instrumentation, monitor integration and
 monitor generation. Identifying and isolating different functionality allows
-MOP to be instantiantiated with diffrent programming languages and logical
+MOP to be instantiated with different programming languages and logical
 formalisms.
 
 ### MOP Architecture
@@ -66,16 +66,16 @@ There are two types of high level components in MOP -
     of monitor generation language independent.
 
 
-### Example MOP Instantiaitions
+### MOP Instances
 
 #### JavaMOP
 
 JavaMOP is an instantiation of the MOP framework for Java [@JavaMOP2012].
-Effecient monitor generation algorithms, [@ParametricCFP2008], [@DynamicProgrammingLTL2001]
-are employed in logic plugins to generate language independent pseudo code.
-JavaMOP uses language independent output of aforementioned logic plugins, and
+Efficient monitor generation algorithms, [@ParametricCFP2008], [@DynamicProgrammingLTL2001]
+are employed in logic plugins to generate language independent pseudo code for
+monitoring. JavaMOP uses language independent output of aforementioned logic plugins, and
 synthesis AspectJ code [@AspectJUrl], which is weaved into the
-targe application with any apsectJ compiler.
+target application with any apsectJ compiler.
 
 #### CMOP
 
@@ -91,14 +91,14 @@ document can be found at
 Currently, we depend on
 [KeymaeraX](http://www.ls.cs.cmu.edu/KeYmaeraX/) [@KeymaeraXUrl], a dL theorem
 prover for
-parising and reasoning about differenial dynamic logic formulas, and on ModelPlex [@ModelPlex2016],
+parsing and reasoning about differenial dynamic logic formulas, and on ModelPlex [@ModelPlex2016],
 a tool built on top of KeymaeraX to generate monitoring code.
 For instrumentation, the C plugin relies on [LLVM](https://llvm.org) [@LLVMUrl]
 
 #### ROSMOP
 
 ROSMOP is an instance of MOP for the widely used Robot Operating System (ROS).
-one of ROSMOP's main strength's is the frontend-syntax of it's language client.
+One of ROSMOP's main strength's is the frontend-syntax of it's language client.
 ROSMOP allows declaration of events (with arguments), where the user writes
 *patterns* to bind relevant parts of a message's arguments to the event.
 For instance, consider the following specification -
@@ -134,9 +134,9 @@ a) The mapping of theory laid out in to
    each of the tools. We discuss, for each tool,  how the implementation
    complies with the MOP architecture discussed in [@MOP2012].
 
-b) We go into engineering details of the codebase's organization, interaction
-   between them and the setup to maintain each repository individually, but
-   have advantages "mono-repo" like setup.
+b) We go into engineering details of the codebase's components, interaction
+   between said components and the setup to maintain each repository individually, but
+   to also have advantages "mono-repo" like advantages.
 
 The following sections discuss, for each tool, the theory behind them.
 
@@ -199,7 +199,7 @@ preventing a node from sending a message to another node if the message violates
 the monitoring logic. ROSRV does this since it essentially replaces ROSmaster,
 providing but maintains much finer grained control over the overall messaging
 infrastructure, to the point where it can intervene and stop messages from
-reaching target nodes if moniting violations are detected.
+reaching target nodes if monitoring violations are detected.
 
 Practically, manually generating C++ code for any practical monitoring
 use is tedious and error prone. Thus, ROSRV relies heavily on ROSMOP
@@ -219,7 +219,7 @@ generate C code for dL specifications lead to the following realizations -
 
  a) dL's use as a logical formalism deals with Hybrid Systems. This is
  intentional - as a variant of First Order Dynamic Logic [@DL79] introduces
- operators for continous evolution of state variables as an extension of
+ operators for continuous evolution of state variables as an extension of
  Dynamic Programs. This extension of Dynamic Programs, known as Hybrid Programs,
  is how Hybrid Systems are modeled in dL. The necessity/possibility operators,
  (also referred to in temporal logics as always/eventually) are used over
@@ -325,7 +325,7 @@ Contribution Guidelines
 -----------------------
 
 Contributions are welcome. Here are our expected
-guidelines. Our guidlines are flexible, and
+guidelines. Our guidelines are flexible, and
 will be flushed out in greater detail as we make progress.
 
   * We're moving towards a TDD model. Depending on the
