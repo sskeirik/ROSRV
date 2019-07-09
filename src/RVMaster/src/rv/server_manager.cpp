@@ -906,6 +906,10 @@ return false;
 }
 
 }
+
+/**
+ * Function managing publisher registration
+ */
 bool ServerManager::registerPublisherCallback(XmlRpc::XmlRpcValue& params, ClientInfo &ci, XmlRpc::XmlRpcValue &result)
 {
 
@@ -928,6 +932,15 @@ if(acctrl::isPublisherAllowed(topic,node_name,ci.ip))
 {
 
  XmlRpc::XmlRpcValue payload;
+
+ if(monitor::monitorTopics.count(topic) == 0) {
+    ROS_WARN("Node %s trying to publish to \"REGULAR\" topic %s", node_name.c_str(), topic.c_str());
+ } else {
+    ROS_WARN("Node %s trying to publish to \"MONITORED\" topic %s", node_name.c_str(), topic.c_str());
+ }
+
+
+
 master::execute("registerPublisher",params,result,payload,true);
 
 ROS_INFO("Node %s successfully registered as a publisher to topic %s", node_name.c_str(), topic.c_str());
