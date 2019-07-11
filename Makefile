@@ -13,7 +13,9 @@ LAUNCH-test : $(TS)/LAUNCH-test.timestamp
 
 $(TS)/LAUNCH-test.timestamp : $(TS)/BUILD-src.timestamp
 	@(source $(CURRENT_DIR)/devel/setup.bash \
-	   && roslaunch $(TEST_DIR)/live_pub_sub.launch &)
+	   && (rosrun rvmaster live_pub &) \
+	   && (rosrun rvmaster live_sub &))
+
 
 LAUNCH-rvmaster : $(TS)/BUILD-src.timestamp $(TS)/LAUCH-roscore.timestamp $(TS)/CREATE-custom-ros-env.timestamp
 	@(source $(CURRENT_DIR)/devel/setup.bash \
@@ -63,7 +65,9 @@ $(TS)/CREATE-BUILD_DIR.timestamp :
 
 CLEAN-processes :
 	@(pkill "roscore" ; rm -f $(TS)/LAUNCH-roscore.timestamp \
-	   ; pkill "rvmaster_rosmas" ; rm -f $(TS)/LAUNCH-rvmaster.timestamp )
+	   ; pkill "rvmaster_rosmas" ; rm -f $(TS)/LAUNCH-rvmaster.timestamp \
+	   ; pkill "live_pub" ; rm -f $(TS)/LAUNCH-test.timestamp \
+	   ; pkill "live_sub")
 	@$(status)
 
 
