@@ -5,7 +5,7 @@ from std_msgs.msg import String
 
 def talker():
   rospy.init_node('talker')
-  topic = rospy.get_param( "/chatter_topic" ) 
+  topic = rospy.get_param( "/chatter_topic" )
   pub_rate_hz = rospy.get_param( "~pub_rate_hz" )
   try:
     topic = rospy.get_param( "~chatter_topic" )
