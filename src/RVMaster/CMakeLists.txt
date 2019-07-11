@@ -3,10 +3,10 @@ project(rvmaster)
 
 get_filename_component(PARENT_DIR ${CMAKE_SOURCE_DIR} PATH)
 
-find_package(catkin REQUIRED COMPONENTS roscpp)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy)
 find_package(Boost REQUIRED COMPONENTS regex program_options)
 catkin_package(
-  INCLUDE_DIRS include 
+  INCLUDE_DIRS include
   )
 
 include_directories(include
@@ -15,30 +15,30 @@ include_directories(include
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} )
 
-add_executable( ${PROJECT_NAME}_rosmaster 
+add_executable( ${PROJECT_NAME}_rosmaster
   src/main.cpp
-  src/rvmonitor.cpp 
-  src/xmlrpcpp/XmlRpcClient.cpp 
-  src/xmlrpcpp/XmlRpcServerConnection.cpp 
-  src/xmlrpcpp/XmlRpcServerMethod.cpp 
-  src/xmlrpcpp/XmlRpcSocket.cpp 
-  src/xmlrpcpp/XmlRpcServer.cpp 
+  src/rvmonitor.cpp
+  src/xmlrpcpp/XmlRpcClient.cpp
+  src/xmlrpcpp/XmlRpcServerConnection.cpp
+  src/xmlrpcpp/XmlRpcServerMethod.cpp
+  src/xmlrpcpp/XmlRpcSocket.cpp
+  src/xmlrpcpp/XmlRpcServer.cpp
   src/xmlrpcpp/XmlRpcSource.cpp
   src/xmlrpcpp/XmlRpcDispatch.cpp
-  src/rv/xmlrpc_manager.cpp 
-  src/rv/connection_manager.cpp 
-  src/rv/transport_publisher_link.cpp 
-  src/rv/transport_subscriber_link.cpp 
-  src/rv/subscription.cpp 
-  src/rv/publisher_link.cpp 
-  src/rv/server_manager.cpp 
-  src/rv/master.cpp 
-  src/rv/acctrl_manager.cpp 
+  src/rv/xmlrpc_manager.cpp
+  src/rv/connection_manager.cpp
+  src/rv/transport_publisher_link.cpp
+  src/rv/transport_subscriber_link.cpp
+  src/rv/subscription.cpp
+  src/rv/publisher_link.cpp
+  src/rv/server_manager.cpp
+  src/rv/master.cpp
+  src/rv/acctrl_manager.cpp
   src/rv/monitor.cpp
   )
 
-target_link_libraries( ${PROJECT_NAME}_rosmaster 
-  ${catkin_LIBRARIES} 
+target_link_libraries( ${PROJECT_NAME}_rosmaster
+  ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
   )
 
@@ -61,10 +61,11 @@ install( DIRECTORY ${PARENT_DIR}/config
 # Build live test cases (not using gtest)
 foreach( live
     live_sub
+    live_pub
     )
   add_executable( ${live} ${CMAKE_SOURCE_DIR}/test/${live}.cpp )
   if(TARGET ${live})
-    target_link_libraries(${live} 
+    target_link_libraries(${live}
       ${catkin_LIBRARIES}
       ${Boost_LIBRARIES}
       )
