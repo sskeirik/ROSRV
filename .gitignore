@@ -8,3 +8,4 @@ docs/overview.pdf
 /src/test/rvmonitor.cpp
 /src/test/rvmonitor.h
 tags
+/.build/
