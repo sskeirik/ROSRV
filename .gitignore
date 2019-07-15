@@ -9,3 +9,5 @@ docs/overview.pdf
 /src/test/rvmonitor.h
 tags
 /.build/
+/src/monitors/src/rvmonitor.cpp
+/src/monitors/include/rvmonitor.h
