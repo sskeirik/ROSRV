@@ -5,6 +5,7 @@ ROSMOP_DIR:=$(CURRENT_DIR)/rosmop
 ROSMOP_TARGET_DIR:=$(CURRENT_DIR)/rosmop/target
 TS:=$(CURRENT_DIR)/.build
 LOGICPLUGINPATH:=${RVMONITOR}/target/release/lib/plugins
+ISOLATED_MONITOR_DIR=$(CURRENT_DIR)/src/monitors
 
 status=echo ==== $(@F) ==== | sed 's/\(.*\).timestamp/\1/'
 
@@ -54,6 +55,31 @@ $(TS)/GEN-monitors.timestamp : $(TEST_DIR)/rvmonitor.rv $(TS)/BUILD-rosmop.times
 	@mv $(TEST_DIR)/rvmonitor.cpp $(CURRENT_DIR)/src/RVMaster/src/
 	@mv $(TEST_DIR)/rvmonitor.h $(CURRENT_DIR)/src/RVMaster/include/
 	@touch $<
+	@$(status)
+
+LAUNCH-isolated-monitorNode : $(TS)/LAUNCH-isolated-monitorNode.timestamp
+
+$(TS)/LAUNCH-isolated-monitorNode.timestamp : $(TS)/BUILD-isolated-monitor.timestamp
+	@(source devel/setup.bash && rosrun rvmonitor_node monitor_node)
+	@touch $@
+	@$(status)
+
+BUILD-isolated-monitor : $(TS)/BUILD-isolated-monitor.timestamp
+
+$(TS)/BUILD-isolated-monitor.timestamp : $(TS)/GEN-isolated-monitor-cpp.timestamp
+	@(cd $(ISOLATED_MONITOR_DIR) \
+	    && rm -f src/rvmonitor.cpp && rm -f include/rvmonitor.h \
+	    && cp $(TEST_DIR)/rvmonitor.cpp src/ && cp $(TEST_DIR)/rvmonitor.h include/)
+	@(cd $(CURRENT_DIR) && source devel/setup.bash && catkin_make --pkg rvmonitor_node -DCMAKE_BUILD_TYPE=Debug)
+	@(touch $@)
+	@$(status)
+
+
+
+$(TS)/GEN-isolated-monitor-cpp.timestamp : $(TEST_DIR)/rvmonitor.rv $(TS)/BUILD-rosmop.timestamp
+	$(ROSMOP_DIR)/bin/rosmop -monitorAsNode $<
+	@echo "Monitor Files placed in " $(TEST_DIR)
+	@touch $@
 	@$(status)
 
 
