@@ -1,5 +1,6 @@
 #include <cstring>
 #include <string>
+#include "ros/ros.h"
 
 testSpecOne() {
        int a = 10;
