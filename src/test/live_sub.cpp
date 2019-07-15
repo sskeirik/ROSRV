@@ -16,8 +16,7 @@ int main(int argc, char **argv)
 
   ros::NodeHandle n;
   std::string topic;
-  n.getParam( "/chatter_topic", topic );
-  ros::Subscriber sub = n.subscribe(topic, 1000, chatter_cb);
+  ros::Subscriber sub = n.subscribe("chatter", 1000, chatter_cb);
 
   ros::spin();
 

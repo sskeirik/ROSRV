@@ -11,18 +11,32 @@ status=echo ==== $(@F) ==== | sed 's/\(.*\).timestamp/\1/'
 
 LAUNCH-test : $(TS)/LAUNCH-test.timestamp
 
-$(TS)/LAUNCH-test.timestamp : $(TS)/BUILD-src.timestamp
+$(TS)/LAUNCH-test.timestamp : $(TS)/LAUNCH-test-publisher.timestamp  $(TS)/LAUNCH-test-subscriber.timestamp
+
+
+LAUNCH-test-publisher : $(TS)/LAUNCH-test-publisher.timestamp
+
+$(TS)/LAUNCH-test-publisher.timestamp : $(TS)/BUILD-src.timestamp
 	@(source $(CURRENT_DIR)/devel/setup.bash \
-	   && (rosrun rvmaster live_pub &) \
-	   && (rosrun rvmaster live_sub &))
+	   && (rosrun rvmaster live_pub &))
+	@$(status)
 
 
-LAUNCH-rvmaster : $(TS)/BUILD-src.timestamp $(TS)/LAUCH-roscore.timestamp $(TS)/CREATE-custom-ros-env.timestamp
+LAUNCH-test-subsriber : $(TS)/LAUNCH-test-subscriber.timestamp
+
+$(TS)/LAUNCH-test-subscriber.timestamp : $(TS)/BUILD-src.timestamp
+	@(source $(CURRENT_DIR)/devel/setup.bash \
+	   && (rosrun rvmaster live_sub &) \
+	   && (rosrun rvmaster live_sub2 &))
+	@$(status)
+
+
+LAUNCH-rvmaster : $(TS)/BUILD-src.timestamp $(TS)/LAUNCH-roscore.timestamp $(TS)/CREATE-custom-ros-env.timestamp
 	@(source $(CURRENT_DIR)/devel/setup.bash \
 	   && source $(CURRENT_DIR)/devel/custom-env.bash \
-	   && rosrun rvmaster rvmaster_rosmaster &)
+	   && rosrun rvmaster rvmaster_rosmaster)
 
-$(TS)/LAUCH-roscore.timestamp :
+$(TS)/LAUNCH-roscore.timestamp :
 	@roscore -p 12345 &
 	@sleep 3
 	@touch $@
@@ -30,8 +44,8 @@ $(TS)/LAUCH-roscore.timestamp :
 
 BUILD-src : $(TS)/BUILD-src.timestamp
 
-$(TS)/BUILD-src.timestamp : $(TS)/GEN-monitors.timestamp
-	@catkin_make
+$(TS)/BUILD-src.timestamp : $(TS)/GEN-monitors.timestamp $(TEST_DIR)/live*.cpp
+	@catkin_make -DCMAKE_BUILD_TYPE=Debug
 
 
 $(TS)/GEN-monitors.timestamp : $(TEST_DIR)/rvmonitor.rv $(TS)/BUILD-rosmop.timestamp
@@ -67,7 +81,7 @@ CLEAN-processes :
 	@(pkill "roscore" ; rm -f $(TS)/LAUNCH-roscore.timestamp \
 	   ; pkill "rvmaster_rosmas" ; rm -f $(TS)/LAUNCH-rvmaster.timestamp \
 	   ; pkill "live_pub" ; rm -f $(TS)/LAUNCH-test.timestamp \
-	   ; pkill "live_sub")
+	   ; pkill "live_sub") || true
 	@$(status)
 
 

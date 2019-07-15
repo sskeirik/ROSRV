@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     std_msgs::String msg;
 
     std::stringstream ss;
-    ss << "publisher " << count;
+    ss << count;
     msg.data = ss.str();
 
     ROS_INFO("%s", msg.data.c_str());
