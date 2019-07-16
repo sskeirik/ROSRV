@@ -3,11 +3,5 @@ build/
 devel/
 .catkin_workspace
 docs/overview.pdf
-/src/RVMaster/src/rvmonitor.cpp
-/src/RVMaster/include/rvmonitor.h
-/src/test/rvmonitor.cpp
-/src/test/rvmonitor.h
 tags
 /.build/
-/src/monitors/src/rvmonitor.cpp
-/src/monitors/include/rvmonitor.h

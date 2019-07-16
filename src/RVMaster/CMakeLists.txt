@@ -1,23 +1,30 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rvmaster)
 
+## ROS Master
+
+LIST(APPEND CMAKE_PROGRAM_PATH  "./rosmop/bin" ...)
+add_custom_command(
+    OUTPUT ${PROJECT_BINARY_DIR}/monitor/rvmonitor.cpp
+           ${PROJECT_BINARY_DIR}/monitor/rvmonitor.h
+    COMMAND mkdir -p ${PROJECT_BINARY_DIR}/monitor/ &&
+            rosmop --output-prefix ${PROJECT_BINARY_DIR}/monitor/rvmonitor
+                   ${PROJECT_SOURCE_DIR}/rvmonitor.rv
+    DEPENDS rvmonitor.rv
+)
+include_directories(${PROJECT_BINARY_DIR}/monitor/)
+
 get_filename_component(PARENT_DIR ${CMAKE_SOURCE_DIR} PATH)
 
 find_package(catkin REQUIRED COMPONENTS roscpp rospy)
 find_package(Boost REQUIRED COMPONENTS regex program_options)
-catkin_package(
-  INCLUDE_DIRS include
-  )
+catkin_package( INCLUDE_DIRS include )
 
-include_directories(include
-  ${catkin_INCLUDE_DIRS}
-  )
-
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} )
+include_directories(include/ ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} )
 
 add_executable( ${PROJECT_NAME}_rosmaster
   src/main.cpp
-  src/rvmonitor.cpp
+  ${PROJECT_BINARY_DIR}/monitor/rvmonitor.cpp
   src/xmlrpcpp/XmlRpcClient.cpp
   src/xmlrpcpp/XmlRpcServerConnection.cpp
   src/xmlrpcpp/XmlRpcServerMethod.cpp
@@ -41,6 +48,8 @@ target_link_libraries( ${PROJECT_NAME}_rosmaster
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
   )
+
+## Install
 
 install( TARGETS ${PROJECT_NAME}_rosmaster
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

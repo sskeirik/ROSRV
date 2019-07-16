@@ -14,6 +14,6 @@ include_directories(
 
 catkin_package()
 
-add_executable(monitor_node src/rvmonitor.cpp)
-target_link_libraries(monitor_node ${catkin_LIBRARIES})
+# add_executable(monitor_node src/rvmonitor.cpp)
+# target_link_libraries(monitor_node ${catkin_LIBRARIES})
 
