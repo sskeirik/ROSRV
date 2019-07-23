@@ -22,40 +22,44 @@ catkin_package( INCLUDE_DIRS include )
 
 include_directories(include/ ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} )
 
-add_executable( ${PROJECT_NAME}_rosmaster
-  src/main.cpp
-  ${PROJECT_BINARY_DIR}/monitor/rvmonitor.cpp
-  src/xmlrpcpp/XmlRpcClient.cpp
-  src/xmlrpcpp/XmlRpcServerConnection.cpp
-  src/xmlrpcpp/XmlRpcServerMethod.cpp
-  src/xmlrpcpp/XmlRpcSocket.cpp
-  src/xmlrpcpp/XmlRpcServer.cpp
-  src/xmlrpcpp/XmlRpcSource.cpp
-  src/xmlrpcpp/XmlRpcDispatch.cpp
-  src/rv/xmlrpc_manager.cpp
-  src/rv/connection_manager.cpp
-  src/rv/transport_publisher_link.cpp
-  src/rv/transport_subscriber_link.cpp
-  src/rv/subscription.cpp
-  src/rv/publisher_link.cpp
-  src/rv/server_manager.cpp
-  src/rv/master.cpp
-  src/rv/acctrl_manager.cpp
-  src/rv/monitor.cpp
-  )
+add_library( librosmaster
+             ${PROJECT_BINARY_DIR}/monitor/rvmonitor.cpp
+             src/xmlrpcpp/XmlRpcClient.cpp
+             src/xmlrpcpp/XmlRpcServerConnection.cpp
+             src/xmlrpcpp/XmlRpcServerMethod.cpp
+             src/xmlrpcpp/XmlRpcSocket.cpp
+             src/xmlrpcpp/XmlRpcServer.cpp
+             src/xmlrpcpp/XmlRpcSource.cpp
+             src/xmlrpcpp/XmlRpcDispatch.cpp
+             src/rv/xmlrpc_manager.cpp
+             src/rv/connection_manager.cpp
+             src/rv/transport_publisher_link.cpp
+             src/rv/transport_subscriber_link.cpp
+             src/rv/subscription.cpp
+             src/rv/publisher_link.cpp
+             src/rv/server_manager.cpp
+             src/rv/master.cpp
+             src/rv/acctrl_manager.cpp
+             src/rv/monitor.cpp
+           )
 
-target_link_libraries( ${PROJECT_NAME}_rosmaster
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-  )
+add_executable(rosmaster    src/main.cpp)
+
+enable_testing()
+add_executable(monitor-test src/test.cpp)
+add_test( NAME monitor-test
+          COMMAND monitor-test
+        )
+
+target_link_libraries(rosmaster librosmaster ${catkin_LIBRARIES} ${Boost_LIBRARIES} )
 
 ## Install
 
-install( TARGETS ${PROJECT_NAME}_rosmaster
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-  )
+install( TARGETS rosmaster
+         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+       )
 
 install( PROGRAMS ${PARENT_DIR}/bin/${PROJECT_NAME}.sh
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

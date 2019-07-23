@@ -21,6 +21,11 @@ policy to address security concerns.
 To install and build ROSRV, please refer to [INSTALL.md](INSTALL.md) for 
 instructions.
 
+## Testing
+
+Run `./Test`. Additional arguments can be passed to `ctest` too. For example:
+`./Test -V` will run tests verbosely.
+
 ## Usage
 
 Refer to [docs/Usage.md](docs/Usage.md) for detailed instructions on how to use 
