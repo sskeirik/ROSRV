@@ -1,6 +1,23 @@
 #!/usr/bin/env bash
 set -e
 
-(cd rosmop ; mvn package -DskipTests)
-make BUILD-src
-(cd build && ctest "$@")
+progress() { echo ==== "$@" ; }
+
+progress "Building rosmop"
+(cd rosmop ; mvn -q package -DskipTests)
+progress "Building src"
+PATH="$(pwd)/rosmop/bin:$PATH"
+make -s BUILD-src
+
+export ROS_MASTER_URI="http://localhost:11311/"
+export REAL_MASTER_URI="http://localhost:20022/"
+export ACCESS_POLICY_PATH=/home/njr/AA/ext/ROSRV/config/access-policy.cfg
+source devel/setup.bash
+
+progress "Running roscore"
+roscore -p 20022  >/dev/null                  & sleep 1
+progress "Running rvmaster"
+rosrun rvmaster rvmaster_rosmaster >/dev/null & sleep 1
+progress "Running tests"
+./devel/lib/rvmaster/monitor-test
+kill $(jobs -p)
