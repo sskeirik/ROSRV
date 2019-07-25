@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rvmaster)
+set(CMAKE_CXX_STANDARD 11)
 
 ## ROS Master
 
@@ -42,16 +43,17 @@ add_library( librosmaster
              src/rv/acctrl_manager.cpp
              src/rv/monitor.cpp
            )
+target_link_libraries(librosmaster ${catkin_LIBRARIES} ${Boost_LIBRARIES} )
 
-add_executable(rosmaster    src/main.cpp)
+add_executable(rosmaster src/main.cpp)
+target_link_libraries(rosmaster librosmaster)
 
 enable_testing()
 add_executable(monitor-test src/test.cpp)
+target_link_libraries(monitor-test librosmaster)
 add_test( NAME monitor-test
           COMMAND monitor-test
         )
-
-target_link_libraries(rosmaster librosmaster ${catkin_LIBRARIES} ${Boost_LIBRARIES} )
 
 ## Install
 

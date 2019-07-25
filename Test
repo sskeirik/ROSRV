@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
+(cd rosmop ; mvn package -DskipTests)
 make BUILD-src
 (cd build && ctest "$@")
