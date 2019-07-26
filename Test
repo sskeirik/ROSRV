@@ -3,10 +3,12 @@ set -e
 
 progress() { echo ==== "$@" ; }
 
+source /opt/ros/kinetic/setup.bash # TODO: This path is Ubuntu specific
+export PATH="$(pwd)/rosmop/bin:$PATH"
+
 progress "Building rosmop"
 (cd rosmop ; mvn -q package -DskipTests)
 progress "Building src"
-PATH="$(pwd)/rosmop/bin:$PATH"
 make -s BUILD-src
 
 export ROS_MASTER_URI="http://localhost:11311/"
