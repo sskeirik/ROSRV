@@ -17,9 +17,13 @@ export ACCESS_POLICY_PATH=/home/njr/AA/ext/ROSRV/config/access-policy.cfg
 source devel/setup.bash
 
 progress "Running roscore"
-roscore -p 20022  >/dev/null                  & sleep 1
+ROS_MASTER_URI="$REAL_MASTER_URI" roscore -p 20022  >/dev/null &
+sleep 1
+
 progress "Running rvmaster"
-rosrun rvmaster rvmaster_rosmaster >/dev/null & sleep 1
+rosrun rvmaster rvmaster_rosmaster >/dev/null &
+sleep 1
+
 progress "Running tests"
 ./devel/lib/rvmaster/monitor-test
 kill $(jobs -p)
