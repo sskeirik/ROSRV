@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from xmlrpclib import ServerProxy
 import os, sys
 total=len(sys.argv) 
