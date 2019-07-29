@@ -4,35 +4,29 @@
 #include <boost/utility.hpp>
 #include "rvmonitor.h"
 
-class ROSInit
-    : boost::noncopyable
-{
-public:
-    ROSInit(char const* name)
-    {
-        std::map<string, string> const remapping_args;
-        uint32_t const options = 0;
-        ros::init(remapping_args, name, options);
-    }
-};
-
 class ROSTest
     : boost::noncopyable
 {
 public:
     ROSTest(char const * name)
         : test_name(name)
-        , ros_init(name)
-        , rate(10)
+        , rate(30)
     {}
 
     ~ROSTest() {
         std::cout << test_name << " passed." << std::endl;
+        wait();
+    }
+
+    void wait(uint n = 30) {
+        for (uint i = 0; i < n; i ++) {
+            ros::spinOnce();
+            rate.sleep();
+        }
     }
 
 private:
     string const test_name;
-    ROSInit ros_init;
 public:
     ros::NodeHandle node;
     ros::Rate rate;
@@ -44,7 +38,7 @@ void test_unmonitored_channel()
     string const topic = "unmonitored";
 
     ros::Publisher pub = t.node.advertise<std_msgs::String>(topic, 1000);
-    ros::spinOnce();
+    t.wait();
 
     boost::optional<std_msgs::String> msg_recvd;
     auto recieved_callback =
@@ -52,24 +46,24 @@ void test_unmonitored_channel()
             msg_recvd = * msg;
         };
     ros::Subscriber sub = t.node.subscribe<std_msgs::String>(topic, 1000, recieved_callback);
-    ros::spinOnce();
+    t.wait();
 
-    char const* msg_data = "Hello from publisher!\n";
+    string const msg_data = "Hello from publisher!\n";
     std_msgs::String msg_sent;
     msg_sent.data = msg_data;
     pub.publish(msg_sent);
-    ros::spinOnce();
-
-    t.rate.sleep();
-    ros::spinOnce();
+    t.wait();
 
     if (!msg_recvd) { throw std::runtime_error("Response not recieved!"); }
     if (msg_recvd->data != msg_data) { throw std::runtime_error("Incorrect message data recieved"); }
 }
 
-int main()
+int main(int argc, char** argv)
 {
+    ros::init(argc, argv, "test");
+    ros::NodeHandle n;
     test_unmonitored_channel();
+    test_monitored_channel();
     std::cout << "Passed.\n";
     return 0;
 }
