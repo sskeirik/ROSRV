@@ -24,6 +24,12 @@ progress "Running rvmaster"
 rosrun rvmaster rvmaster_rosmaster >/dev/null &
 sleep 1
 
+monitor=testSpecOne
+progress "Enabling $monitor"
+bin/rosrv.py -enable "$monitor" >/dev/null
+bin/rosrv.py -list "$monitor"
+sleep 1
+
 progress "Running tests"
 ./devel/lib/rvmaster/monitor-test
 kill $(jobs -p)

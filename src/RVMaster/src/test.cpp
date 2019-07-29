@@ -58,6 +58,32 @@ void test_unmonitored_channel()
     if (msg_recvd->data != msg_data) { throw std::runtime_error("Incorrect message data recieved"); }
 }
 
+void test_monitored_channel()
+{
+    ROSTest t(__FUNCTION__);
+    string const topic = "/chatter";
+
+    ros::Publisher pub = t.node.advertise<std_msgs::String>(topic, 1000);
+    t.wait();
+
+    boost::optional<std_msgs::String> msg_recvd;
+    auto recieved_callback =
+        [&msg_recvd] (std_msgs::String::ConstPtr const& msg) {
+            msg_recvd = * msg;
+        };
+    ros::Subscriber sub = t.node.subscribe<std_msgs::String>(topic, 1000, recieved_callback);
+    t.wait();
+
+    string const msg_data = "Hello from publisher!\n";
+    std_msgs::String msg_sent;
+    msg_sent.data = msg_data;
+    pub.publish(msg_sent);
+    t.wait();
+
+    if (!msg_recvd) { throw std::runtime_error("Response not recieved!"); }
+    if (msg_recvd->data != msg_data + "RV") { throw std::runtime_error("Incorrect message data recieved: " + msg_recvd->data); }
+}
+
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "test");
