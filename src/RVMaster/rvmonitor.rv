@@ -3,13 +3,12 @@
 #include "ros/ros.h"
 
 testSpecOne() {
-       int a = 10;
-       int b;
+    int a = 10;
+    int b;
 
-       event controlMessageOne(std::string msg) /chatter std_msgs/String '{data:msg}'
-       {
-			msg = msg +"RV";
-			ROS_INFO("%s", msg.c_str());
-       }
-
+    event controlMessageOne(std::string msg) /chatter std_msgs/String '{data:msg}'
+    {
+        msg = msg + "RV";
+        ROS_INFO("%s", msg.c_str());
+    }
 }
