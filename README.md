@@ -23,8 +23,7 @@ instructions.
 
 ## Testing
 
-Run `./Test`. Additional arguments can be passed to `ctest` too. For example:
-`./Test -V` will run tests verbosely.
+Run `./Test`. Additional arguments are passed to `pytest`.
 
 ## Usage
 
