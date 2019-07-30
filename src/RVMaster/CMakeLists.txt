@@ -57,16 +57,3 @@ install( DIRECTORY ${PARENT_DIR}/config
   PATTERN "*~" EXCLUDE
   PATTERN ".*.swp" EXCLUDE
   )
-
-# Build live test cases (not using gtest)
-foreach( live
-    live_sub
-    )
-  add_executable( ${live} ${CMAKE_SOURCE_DIR}/test/${live}.cpp )
-  if(TARGET ${live})
-    target_link_libraries(${live} 
-      ${catkin_LIBRARIES}
-      ${Boost_LIBRARIES}
-      )
-  endif()
-endforeach()
