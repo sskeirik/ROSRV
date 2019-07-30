@@ -4,7 +4,6 @@ set(CMAKE_CXX_STANDARD 11)
 
 ## ROS Master
 
-LIST(APPEND CMAKE_PROGRAM_PATH  "./rosmop/bin" ...)
 add_custom_command(
     OUTPUT ${PROJECT_BINARY_DIR}/monitor/rvmonitor.cpp
            ${PROJECT_BINARY_DIR}/monitor/rvmonitor.h
