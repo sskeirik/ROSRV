@@ -1,7 +1,13 @@
-*~
+# Catkin products
+/.catkin_tools/
 /build/
 /devel/
-.catkin_workspace
+/logs/
+
+# Other build products
 /docs/overview.pdf
+
+# Dev artifacts
 tags
 /src/RVMaster/__pycache__/
+*~
