@@ -23,7 +23,7 @@ catkin_package( INCLUDE_DIRS include )
 
 include_directories(include/ ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} )
 
-add_library( librosmaster
+add_library( librvmaster
              ${PROJECT_BINARY_DIR}/monitor/rvmonitor.cpp
              src/xmlrpcpp/XmlRpcClient.cpp
              src/xmlrpcpp/XmlRpcServerConnection.cpp
@@ -43,14 +43,14 @@ add_library( librosmaster
              src/rv/acctrl_manager.cpp
              src/rv/monitor.cpp
            )
-target_link_libraries(librosmaster ${catkin_LIBRARIES} ${Boost_LIBRARIES} )
+target_link_libraries(librvmaster ${catkin_LIBRARIES} ${Boost_LIBRARIES} )
 
-add_executable(rosmaster src/main.cpp)
-target_link_libraries(rosmaster librosmaster)
+add_executable(rvmaster src/main.cpp)
+target_link_libraries(rvmaster librvmaster)
 
 ## Install
 
-install( TARGETS rosmaster
+install( TARGETS rvmaster
          ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
          LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
          RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

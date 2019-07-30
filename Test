@@ -27,7 +27,7 @@ ROS_MASTER_URI="$REAL_MASTER_URI" roscore -p 20022  >/dev/null &
 sleep 1
 
 progress "Running rvmaster"
-rosrun rvmaster rvmaster_rosmaster >/dev/null &
+rosrun rvmaster rvmaster >/dev/null &
 sleep 1
 
 monitor=testSpecOne
