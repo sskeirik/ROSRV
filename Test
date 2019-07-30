@@ -14,8 +14,9 @@ export PATH="$(pwd)/rosmop/bin:$PATH"
 
 progress "Building rosmop"
 (cd rosmop ; mvn -q package -DskipTests)
+
 progress "Building src"
-make -s BUILD-src
+catkin_make -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON
 
 export ROS_MASTER_URI="http://localhost:11311/"
 export REAL_MASTER_URI="http://localhost:20022/"
