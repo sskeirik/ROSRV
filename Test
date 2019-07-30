@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
+type pytest > /dev/null \
+    || { echo 'Please install pytest for python2 via pip.'
+         echo 'On ubuntu xenial run:: `pip2 install pip && pip2 install --user pytest`'
+         exit 1
+       }
+
 progress() { echo ==== "$@" ; }
 
 source /opt/ros/kinetic/setup.bash # TODO: This path is Ubuntu specific
@@ -31,5 +37,6 @@ bin/rosrv.py -list "$monitor"
 sleep 1
 
 progress "Running tests"
-./devel/lib/rvmaster/monitor-test
+pytest ./src/RVMaster/test-monitors.py
+
 kill $(jobs -p)

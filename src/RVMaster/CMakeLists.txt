@@ -48,13 +48,6 @@ target_link_libraries(librosmaster ${catkin_LIBRARIES} ${Boost_LIBRARIES} )
 add_executable(rosmaster src/main.cpp)
 target_link_libraries(rosmaster librosmaster)
 
-enable_testing()
-add_executable(monitor-test src/test.cpp)
-target_link_libraries(monitor-test librosmaster)
-add_test( NAME monitor-test
-          COMMAND monitor-test
-        )
-
 ## Install
 
 install( TARGETS rosmaster

@@ -5,3 +5,4 @@ devel/
 docs/overview.pdf
 tags
 /.build/
+/src/RVMaster/__pycache__/
