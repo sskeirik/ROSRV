@@ -1,0 +1,41 @@
+#include state.h
+
+DLTestMonitor() {
+
+  event ctrl_flow_cmd(double flow) /ctrl_flow_cmd std_msgs/Float64 '{data : flow}' {
+        if(!monitorSatisfied(pre, current, &params)) {
+            ROS_INFO("dL Violation");
+        }
+  }
+  event water_level(double level) /water_level std_msgs/Float64 '{data : level}' {
+       updateState_l(level);
+  }
+  event current_flow(double curr_flow) /flow_actual std_msgs/Float64 '{data : curr_flow}' {
+       updateState_f();
+  }
+  dL:
+           Functions.
+             R m.
+             R ep.
+           End.
+
+           ProgramVariables.
+             R f.
+             R l.
+             R c.
+           End.
+
+           Problem.
+                (0 <= l & l <= m & 0 < ep)
+             -> [
+                 { f :=*;
+                   ?-1 <= f & f <= (m-l)/ep;
+                   c := 0;
+                   { l' = f, c' = 1 & 0 <= l & c <= ep }
+                 }*
+                ](0 <= l & l <= m)
+           End.
+
+    @dLviolation { printf("Violation Occured \n"); }
+
+}
