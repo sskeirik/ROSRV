@@ -1,8 +1,7 @@
 *~
-build/
-devel/
+/build/
+/devel/
 .catkin_workspace
-docs/overview.pdf
+/docs/overview.pdf
 tags
-/.build/
 /src/RVMaster/__pycache__/
