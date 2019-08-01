@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 set -e
 
+progress() { echo ==== "$@" ; }
+
 trap 'cleanup; echo >&2 "FAILED!"' 0
-cleanup() { progress "Cleaning up"; kill $(jobs -p) >/dev/null ; }
+cleanup() { progress "Cleaning up"; kill $(jobs -p) >/dev/null 2>&1 || true ; }
 clean_exit() {
     cleanup
     trap '' 0
-    error_code=$(shift)
+    error_code=$1; shift
     echo >&2 "$@"
     exit $error_code
 }
 
 type pytest > /dev/null \
-    || clean_exit 1 -n \
-            'Please install pytest for python2 via pip.\n' \
-            'On ubuntu xenial run:: `pip2 install pip && pip2 install --user pytest`'
-
-progress() { echo ==== "$@" ; }
+    || clean_exit 1 -e \
+            'Please install pytest for python2 via pip.' \
+          '\nOn ubuntu xenial run:: `pip2 install pip && pip2 install --user pytest`'
 
 source /opt/ros/kinetic/setup.bash # TODO: This path is Ubuntu specific
 export PATH="$(pwd)/rosmop/bin:$PATH"
