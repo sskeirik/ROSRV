@@ -29,7 +29,7 @@ catkin_make -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON
 
 export ROS_MASTER_URI="http://localhost:11311/"
 export REAL_MASTER_URI="http://localhost:20022/"
-export ACCESS_POLICY_PATH=/home/njr/AA/ext/ROSRV/config/access-policy.cfg
+export ACCESS_POLICY_PATH="./config/access-policy.cfg"
 source devel/setup.bash
 
 progress "Running roscore"
