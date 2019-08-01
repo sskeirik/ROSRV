@@ -24,27 +24,27 @@ include_directories(include/ ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} )
 
 add_library( librvmaster
              ${PROJECT_BINARY_DIR}/monitor/rvmonitor.cpp
-             src/xmlrpcpp/XmlRpcClient.cpp
-             src/xmlrpcpp/XmlRpcServerConnection.cpp
-             src/xmlrpcpp/XmlRpcServerMethod.cpp
-             src/xmlrpcpp/XmlRpcSocket.cpp
-             src/xmlrpcpp/XmlRpcServer.cpp
-             src/xmlrpcpp/XmlRpcSource.cpp
-             src/xmlrpcpp/XmlRpcDispatch.cpp
-             src/rv/xmlrpc_manager.cpp
-             src/rv/connection_manager.cpp
-             src/rv/transport_publisher_link.cpp
-             src/rv/transport_subscriber_link.cpp
-             src/rv/subscription.cpp
-             src/rv/publisher_link.cpp
-             src/rv/server_manager.cpp
-             src/rv/master.cpp
-             src/rv/acctrl_manager.cpp
-             src/rv/monitor.cpp
+             xmlrpcpp/XmlRpcClient.cpp
+             xmlrpcpp/XmlRpcServerConnection.cpp
+             xmlrpcpp/XmlRpcServerMethod.cpp
+             xmlrpcpp/XmlRpcSocket.cpp
+             xmlrpcpp/XmlRpcServer.cpp
+             xmlrpcpp/XmlRpcSource.cpp
+             xmlrpcpp/XmlRpcDispatch.cpp
+             rv/xmlrpc_manager.cpp
+             rv/connection_manager.cpp
+             rv/transport_publisher_link.cpp
+             rv/transport_subscriber_link.cpp
+             rv/subscription.cpp
+             rv/publisher_link.cpp
+             rv/server_manager.cpp
+             rv/master.cpp
+             rv/acctrl_manager.cpp
+             rv/monitor.cpp
            )
 target_link_libraries(librvmaster ${catkin_LIBRARIES} ${Boost_LIBRARIES} )
 
-add_executable(rvmaster src/main.cpp)
+add_executable(rvmaster main.cpp)
 target_link_libraries(rvmaster librvmaster)
 
 ## Isolated monitor
