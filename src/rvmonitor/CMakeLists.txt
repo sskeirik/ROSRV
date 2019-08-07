@@ -16,6 +16,8 @@ find_package(catkin REQUIRED)
 #   std_msgs  # Or other packages containing msgs
 # )
 
+find_package(catkin REQUIRED COMPONENTS roscpp)
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -37,27 +39,14 @@ catkin_package(
 ## Build ##
 ###########
 
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-include_directories(
-# include
-# ${catkin_INCLUDE_DIRS}
-)
+include_directories( include )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/rvmonitor.cpp
-# )
-
-## Add cmake target dependencies of the library
-## as an example, code may need to be generated before libraries
-## either from message generation or dynamic reconfigure
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Declare a C++ executable
-## With catkin_make all packages are built within a single CMake context
-## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/rvmonitor_node.cpp)
+add_library(librvmonitor
+  src/monitor.cpp
+)
+target_include_directories(librvmonitor PUBLIC ${catkin_INCLUDE_DIRS})
+target_link_libraries(librvmonitor ${catkin_LIBRARIES})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -77,9 +66,6 @@ include_directories(
 #############
 ## Install ##
 #############
-
-# all install targets should use catkin DESTINATION variables
-# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
@@ -112,6 +98,21 @@ include_directories(
 #############
 ## Testing ##
 #############
+
+## monitor
+
+add_custom_command(
+    OUTPUT ${PROJECT_BINARY_DIR}/isolated-monitor/rvmonitor.cpp
+           ${PROJECT_BINARY_DIR}/isolated-monitor/rvmonitor.h
+    COMMAND mkdir -p ${PROJECT_BINARY_DIR}/isolated-monitor/ &&
+            rosmop --output-prefix ${PROJECT_BINARY_DIR}/isolated-monitor/rvmonitor
+                   --monitor-as-node
+                   ${PROJECT_SOURCE_DIR}/rvmonitor.rv
+    DEPENDS rvmonitor.rv
+)
+add_executable(test-isolated-monitor ${PROJECT_BINARY_DIR}/isolated-monitor/rvmonitor.cpp)
+target_include_directories(test-isolated-monitor PRIVATE ${PROJECT_BINARY_DIR}/isolated-monitor/)
+target_link_libraries(test-isolated-monitor librvmonitor)
 
 ## Add gtest based cpp test target and link libraries
 # catkin_add_gtest(${PROJECT_NAME}-test test/test_rvmonitor.cpp)

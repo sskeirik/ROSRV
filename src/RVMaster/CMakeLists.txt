@@ -47,21 +47,6 @@ target_link_libraries(librvmaster ${catkin_LIBRARIES} ${Boost_LIBRARIES} )
 add_executable(rvmaster src/main.cpp)
 target_link_libraries(rvmaster librvmaster)
 
-## Isolated monitor
-
-add_custom_command(
-    OUTPUT ${PROJECT_BINARY_DIR}/isolated-monitor/rvmonitor.cpp
-           ${PROJECT_BINARY_DIR}/isolated-monitor/rvmonitor.h
-    COMMAND mkdir -p ${PROJECT_BINARY_DIR}/isolated-monitor/ &&
-            rosmop --output-prefix ${PROJECT_BINARY_DIR}/isolated-monitor/rvmonitor
-                   --monitor-as-node
-                   ${PROJECT_SOURCE_DIR}/rvmonitor.rv
-    DEPENDS rvmonitor.rv
-)
-add_executable(test-isolated-monitor ${PROJECT_BINARY_DIR}/isolated-monitor/rvmonitor.cpp)
-target_include_directories(test-isolated-monitor PRIVATE ${PROJECT_BINARY_DIR}/isolated-monitor/)
-target_link_libraries(test-isolated-monitor ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-
 ## Install
 
 install( TARGETS rvmaster

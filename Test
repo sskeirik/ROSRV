@@ -6,7 +6,7 @@ repo_dir="$(cd "$(dirname "$0")"; pwd)"
 progress() { echo ==== "$@" ; }
 
 trap 'cleanup; echo >&2 "FAILED!"' 0
-cleanup() { progress "Cleaning up"; kill $(jobs -p) >/dev/null 2>&1 || true ; }
+cleanup() { progress "Cleaning up"; kill $(jobs -p) >/dev/null 2>&1 || true ; sleep 1 ; }
 clean_exit() {
     cleanup
     trap '' 0
@@ -33,7 +33,6 @@ test_against_rvmaster() {
     export ROS_MASTER_URI="http://localhost:11311/"
     export REAL_MASTER_URI="http://localhost:20022/"
     export ACCESS_POLICY_PATH="$repo_dir/config/access-policy.cfg"
-    source devel/setup.bash
 
     progress "Running roscore"
     ROS_MASTER_URI="$REAL_MASTER_URI" roscore -p 20022  >/dev/null &
@@ -51,7 +50,30 @@ test_against_rvmaster() {
 
     progress "Running tests"
     pytest t/test-against-rvmaster.py
+
+    cleanup
 }
 
-( test_against_rvmaster )
+test_without_rvmaster() {
+    export ROS_MASTER_URI="http://localhost:20022/"
+    export ACCESS_POLICY_PATH="$repo_dir/config/access-policy.cfg"
+
+    progress "Running roscore"
+    roscore -p 20022 >/dev/null  &
+    sleep 1
+
+    progress "Running monitor"
+    rosrun rvmonitor test-isolated-monitor >/dev/null & sleep 1
+
+    progress "Running tests"
+    pytest t/test-without-rvmaster.py
+
+    cleanup
+}
+
+source devel/setup.bash
+( progress test_against_rvmaster ; test_against_rvmaster )
+( progress test_without_rvmaster
+  test_without_rvmaster
+)
 clean_exit 0
