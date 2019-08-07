@@ -12,30 +12,6 @@ std::string getMonitorSubscribedTopicForTopic(const std::string& topic);
 std::string getMonitorAdvertisedTopicForTopic(const std::string& topic);
 
 template<class MessageType>
-struct MonitorEvent
-{
-    template<class T, class DatumType>
-    MonitorEvent( T* owner
-                , void (T::*callback)(DatumType) 
-                , DatumType (T::*getDatum)(MessageType&) 
-                , std::string const& topic
-                )
-        : topic(topic)
-        , m_callback([owner, callback, getDatum](MessageType& msg) -> void {
-                        (owner->*callback)((owner->*getDatum)(msg)); 
-                     })
-    {
-    }
-
-    void callback(MessageType& message) {
-        m_callback(message);
-    }
-
-    std::function<void(MessageType&)> m_callback;
-    std::string const topic;
-};
-
-template<class MessageType>
 struct MonitorTopic
 {
     ros::Publisher  publisher;
@@ -49,10 +25,6 @@ struct MonitorTopic
                                  , this
                     )            )
     {
-    }
-
-    void registerEvent(MonitorEvent<MessageType>& event) {
-        m_events.push_back(event.m_callback);
     }
 
     template<class T, class DatumType>
