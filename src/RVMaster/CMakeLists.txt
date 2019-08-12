@@ -23,7 +23,7 @@ catkin_package( INCLUDE_DIRS include )
 include_directories(include/ ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} )
 
 add_library( librvmaster
-             ${PROJECT_BINARY_DIR}/monitor/rvmonitor.cpp
+             ${PROJECT_BINARY_DIR}/monitor/rvmonitor.h
              src/xmlrpcpp/XmlRpcClient.cpp
              src/xmlrpcpp/XmlRpcServerConnection.cpp
              src/xmlrpcpp/XmlRpcServerMethod.cpp

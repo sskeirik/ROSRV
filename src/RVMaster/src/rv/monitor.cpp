@@ -88,8 +88,6 @@ Monitor::Monitor(XmlRpc::XmlRpcValue &params, string hostname,
   //   ros::AdvertiseOptions ops_pub;
   ros::SubscribeOptions ops_sub;
 
-  RVMonitor *rvmonitor = new RVMonitor(topic, ops_sub);
-
   //   ops_pub.callback_queue = ops_sub.callback_queue;
 
   // pub_ptr = ros::PublicationPtr(new ros::Publication(ops_pub.topic,

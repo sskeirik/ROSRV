@@ -25,14 +25,16 @@ static string MONITOR_POSTFIX="__monitor__";
 namespace monitor
 {
 //shared data among monitors
-extern std::set<std::string> monitorTopics;
-extern std::set<std::string> allMonitors;
-extern std::map<string,string> topicsAndTypes;
-extern std::set<std::string> enabledMonitors;
+/* extern */ std::set<std::string> monitorTopics;
+/* extern */ std::set<std::string> allMonitors;
+/* extern */ std::map<string,string> topicsAndTypes;
+/* extern */ std::set<std::string> enabledMonitors;
 
-extern void initMonitorTopics();
-extern void initAdvertiseOptions(std::string topic, ros::AdvertiseOptions &ops_pub);
-//extern void initSubscribeOptions(std::string topic, ros::SubscribeOptions ops_sub);
+/*
+void initMonitorTopics();
+void initAdvertiseOptions(std::string topic, ros::AdvertiseOptions &ops_pub);
+void initSubscribeOptions(std::string topic, ros::SubscribeOptions ops_sub);
+*/
 }
 
 const ServerManagerPtr& ServerManager::instance()
@@ -53,7 +55,7 @@ ServerManager::ServerManager()
 : shutting_down_(false)
 {
 acctrl::init();//initialize access control
-rv::monitor::initMonitorTopics();//initialize monitor topics
+// rv::monitor::initMonitorTopics();//initialize monitor topics
 ros::initInternalTimerManager();
 }
 ServerManager::~ServerManager()
@@ -66,16 +68,16 @@ ros::PublicationPtr ServerManager::getOrCreatePubPtr(std::string topic)
         if(pubptrMap.find(topic)==pubptrMap.end())//no pub_ptr available
         {
 //ROS_INFO("entered %s", topic.c_str());
-          ros::AdvertiseOptions ops_pub; 
-          rv::monitor::initAdvertiseOptions(topic,ops_pub);
+          // ros::AdvertiseOptions ops_pub; 
+          // rv::monitor::initAdvertiseOptions(topic,ops_pub);
 
-          //ops_pub.callback_queue = ops_sub.callback_queue;
-          ros::PublicationPtr pub_ptr_ = ros::PublicationPtr(new ros::Publication(ops_pub.topic, ops_pub.datatype, ops_pub.md5sum, ops_pub.message_definition, ops_pub.queue_size, ops_pub.latch, ops_pub.has_header)); 
-          ros::SubscriberCallbacksPtr callbacks(new ros::SubscriberCallbacks(ops_pub.connect_cb, ops_pub.disconnect_cb, ops_pub.tracked_object, ops_pub.callback_queue));  
+          // //ops_pub.callback_queue = ops_sub.callback_queue;
+          // ros::PublicationPtr pub_ptr_ = ros::PublicationPtr(new ros::Publication(ops_pub.topic, ops_pub.datatype, ops_pub.md5sum, ops_pub.message_definition, ops_pub.queue_size, ops_pub.latch, ops_pub.has_header)); 
+          // ros::SubscriberCallbacksPtr callbacks(new ros::SubscriberCallbacks(ops_pub.connect_cb, ops_pub.disconnect_cb, ops_pub.tracked_object, ops_pub.callback_queue));  
 
-          pub_ptr_->addCallbacks(callbacks); 
-          
-          pubptrMap[topic] = pub_ptr_;
+          // pub_ptr_->addCallbacks(callbacks); 
+          // 
+          // pubptrMap[topic] = pub_ptr_;
 //ROS_INFO("got pub pointer");
         }
         return pubptrMap[topic];

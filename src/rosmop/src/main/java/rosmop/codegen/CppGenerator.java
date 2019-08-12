@@ -93,7 +93,7 @@ public class CppGenerator {
 
         printer.printLn();
         printer.printLn("using namespace std;");
-        printer.printLn("namespace rv");
+        printer.printLn("namespace rosmop_generated");
         printer.printLn("{"); printer.indent();
 
         for (CSpecification cspec : toWrite.keySet()) {
@@ -139,7 +139,7 @@ public class CppGenerator {
 
         printer.printLn();
         for (CSpecification cspec : toWrite.keySet()) {
-            printer.printLn("rv::" + cspec.getSpecName() + " " + cspec.getSpecName() + ";");
+            printer.printLn("rosmop_generated::" + cspec.getSpecName() + " " + cspec.getSpecName() + ";");
         }
 
         printer.printLn();
@@ -154,8 +154,8 @@ public class CppGenerator {
 
                 printer.printLn(getCNameForTopic(topic) + ".registerEvent(" +
                        "&" + cspec.getSpecName() +
-                   ", &" + "rv::" + cspec.getSpecName() + "::" + callbackNameForEvent(event) +
-                   ", &" + "rv::" + cspec.getSpecName() + "::" + accessorNameForEvent(event) +
+                   ", &" + "rosmop_generated::" + cspec.getSpecName() + "::" + callbackNameForEvent(event) +
+                   ", &" + "rosmop_generated::" + cspec.getSpecName() + "::" + accessorNameForEvent(event) +
                       ");");
             }
         }
@@ -167,7 +167,7 @@ public class CppGenerator {
         printer.printLn("int main(int argc, char ** argv)\n"
                       + "{\n"
                       + "    ros::init(argc, argv, \"rvmonitor\");\n"
-                      + "    rv::Monitor m;\n"
+                      + "    rosmop_generated::Monitor m;\n"
                       + "    ros::spin();\n"
                       + "    return 0;\n"
                       + "}");
