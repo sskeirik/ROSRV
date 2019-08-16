@@ -53,12 +53,12 @@ xmlrpc_manager_->bind("setParam", boost::bind(&rv::ServerManager::setParamCallba
 xmlrpc_manager_->bind("searchParam", boost::bind(&rv::ServerManager::searchParamCallback, server_manager_,_1,_2,_3));
 xmlrpc_manager_->bind("hasParam", boost::bind(&rv::ServerManager::hasParamCallback, server_manager_,_1,_2,_3));
 
-//for debugging
-xmlrpc_manager_->bind("getRVState", boost::bind(&rv::ServerManager::getRVStateCallback, server_manager_,_1,_2,_3));
-xmlrpc_manager_->bind("getMonitors", boost::bind(&rv::ServerManager::getMonitorsCallback, server_manager_,_1,_2,_3));
-
-//for controlling monitors
-xmlrpc_manager_->bind("monitorControl", boost::bind(&rv::ServerManager::monitorControlCallback, server_manager_,_1,_2,_3));
+// //for debugging
+// xmlrpc_manager_->bind("getRVState", boost::bind(&rv::ServerManager::getRVStateCallback, server_manager_,_1,_2,_3));
+// xmlrpc_manager_->bind("getMonitors", boost::bind(&rv::ServerManager::getMonitorsCallback, server_manager_,_1,_2,_3));
+// 
+// //for controlling monitors
+// xmlrpc_manager_->bind("monitorControl", boost::bind(&rv::ServerManager::monitorControlCallback, server_manager_,_1,_2,_3));
 
 xmlrpc_manager_->start();
 server_manager_->start();
