@@ -42,9 +42,9 @@ catkin_package(
 include_directories( include )
 
 ## Declare a C++ library
-add_library(librvmonitor
-  src/monitor.cpp
-)
+add_library( librvmonitor
+             src/monitor.cpp
+           )
 target_include_directories(librvmonitor PUBLIC ${catkin_INCLUDE_DIRS})
 target_link_libraries(librvmonitor ${catkin_LIBRARIES})
 
@@ -119,6 +119,9 @@ endfunction()
 build_monitor(${PROJECT_SOURCE_DIR}/specs/single-parameter.rv monitor-single-parameter)
 build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-parameters.rv monitor-multiple-parameters)
 build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-channels.rv monitor-multiple-channels)
+
+add_executable(experiment experiment.cpp)
+target_link_libraries(experiment librvmonitor)
 
 ## Add gtest based cpp test target and link libraries
 # catkin_add_gtest(${PROJECT_NAME}-test test/test_rvmonitor.cpp)
