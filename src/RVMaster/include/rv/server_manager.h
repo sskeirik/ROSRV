@@ -2,7 +2,6 @@
 #define RVCPP_SERVER_MANAGER_H
 
 #include "XmlRpcValue.h"
-#include "rv/monitor.h"
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 #include "ros/common.h"
@@ -19,7 +18,6 @@ public:
   static const ServerManagerPtr& instance();
   ServerManager();
   ~ServerManager();
-  Monitor* getMonitor(std::string topic);
   void start();
   void shutdown();
   void publish(std::string topic, ros::SerializedMessage message);
@@ -34,8 +32,6 @@ public:
   bool lookupNodeCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result);
   bool getRVStateCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result);
   bool getMonitorsCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result);
-  bool monitorControlCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result);
-  void monitorControl(std::string monitor, bool enable);
 
   bool getSystemStateCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result);
   bool getPidCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result);
@@ -53,18 +49,15 @@ public:
   bool setParamCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result);
   bool searchParamCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result);
   bool hasParamCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result);
-  void createInterceptors();
 
 private:
   bool requestTopic(const std::string& topic, XmlRpc::XmlRpcValue& protos, XmlRpc::XmlRpcValue& ret);
   volatile bool shutting_down_;
   boost::mutex shutting_down_mutex_;
 
-  map<string, Monitor*> monitorMap;
-  map<string, ros::PublicationPtr> pubptrMap;
   uint32_t real_ros_port;
   uint32_t rv_ros_port;
-  string rv_ros_host;
+  std::string rv_ros_host;
 };
 
 }  // namespace rv

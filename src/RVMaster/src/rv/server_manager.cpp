@@ -15,26 +15,16 @@ using namespace std;
 
 namespace rv
 {
+
+namespace monitor {
+  std::set<std::string> monitorTopics;
+}
+
+
 ServerManagerPtr g_server_manager;
 boost::mutex g_server_manager_mutex;
 
-// static bool isCreated = false;
-
-static string MONITOR_POSTFIX = "__monitor__";
-namespace monitor
-{
-// shared data among monitors
-/* extern */ std::set<std::string> monitorTopics;
-/* extern */ std::set<std::string> allMonitors;
-/* extern */ std::map<string, string> topicsAndTypes;
-/* extern */ std::set<std::string> enabledMonitors;
-
-/*
-void initMonitorTopics();
-void initAdvertiseOptions(std::string topic, ros::AdvertiseOptions &ops_pub);
-void initSubscribeOptions(std::string topic, ros::SubscribeOptions ops_sub);
-*/
-}  // namespace monitor
+static string const MONITOR_POSTFIX = "__monitor__";
 
 const ServerManagerPtr& ServerManager::instance()
 {
@@ -59,33 +49,6 @@ ServerManager::ServerManager() : shutting_down_(false)
 ServerManager::~ServerManager()
 {
   shutdown();
-}
-
-ros::PublicationPtr ServerManager::getOrCreatePubPtr(std::string topic)
-{
-  if (pubptrMap.find(topic) == pubptrMap.end())  // no pub_ptr available
-  {
-    // ROS_INFO("entered %s", topic.c_str());
-    // ros::AdvertiseOptions ops_pub;
-    // rv::monitor::initAdvertiseOptions(topic,ops_pub);
-
-    // //ops_pub.callback_queue = ops_sub.callback_queue;
-    // ros::PublicationPtr pub_ptr_ = ros::PublicationPtr(new ros::Publication(ops_pub.topic, ops_pub.datatype,
-    // ops_pub.md5sum, ops_pub.message_definition, ops_pub.queue_size, ops_pub.latch, ops_pub.has_header));
-    // ros::SubscriberCallbacksPtr callbacks(new ros::SubscriberCallbacks(ops_pub.connect_cb, ops_pub.disconnect_cb,
-    // ops_pub.tracked_object, ops_pub.callback_queue));
-
-    // pub_ptr_->addCallbacks(callbacks);
-    //
-    // pubptrMap[topic] = pub_ptr_;
-    // ROS_INFO("got pub pointer");
-  }
-  return pubptrMap[topic];
-}
-void ServerManager::publish(std::string topic, ros::SerializedMessage serializedMsg)
-{
-  ros::PublicationPtr pub_ptr = getOrCreatePubPtr(topic);
-  pub_ptr->publish(serializedMsg);
 }
 
 void ServerManager::start()
@@ -123,13 +86,7 @@ void ServerManager::start()
     gethostname(hostname, 1023);
     string hostname_str(hostname);
     rv_ros_host = hostname_str;
-    // ROS_INFO("rvroshost: %s",hostname);
   }
-  // ROS_INFO("rvroshost: %s",rv_ros_host.c_str());
-  // 	if(!isCreated){
-  createInterceptors();
-  // 	isCreated = true;
-  //	}
 }
 
 void ServerManager::shutdown()
@@ -326,53 +283,6 @@ bool ServerManager::getTopicTypesCallback(XmlRpc::XmlRpcValue& params, ClientInf
   }
 }
 
-bool ServerManager::getMonitorsCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result)
-{
-  string node_name = params[0];
-
-  ROS_INFO("Node %s trying to getMonitors", node_name.c_str());
-
-  std::string command = "getMonitors";
-
-  if (acctrl::isCommandAllowed(command, node_name, ci.ip))
-  {
-    XmlRpc::XmlRpcValue monitors_value;
-
-    // ROS_INFO("Number of Monitors: %d", monitorMap.size());
-
-    std::set<string>::iterator iter;
-    int i = 0;
-    for (iter = monitor::allMonitors.begin(); iter != monitor::allMonitors.end(); iter++)
-    {
-      string monitor_name = *iter;
-
-      XmlRpc::XmlRpcValue monitor_value;
-      monitor_value[0] = monitor_name;
-      if (monitor::enabledMonitors.find(monitor_name) != monitor::enabledMonitors.end())
-        monitor_value[1] = true;
-      else
-        monitor_value[1] = false;
-
-      monitors_value[i] = monitor_value;
-      i++;
-    }
-
-    result[0] = 1;
-    result[1] = "Monitors";
-    result[2] = monitors_value;
-
-    ROS_INFO("Node %s successfully getMonitors from %s", node_name.c_str(), ci.ip.c_str());
-    return true;
-  }
-  else
-  {
-    ROS_WARN("Node %s is not able to getMonitors from %s due to access control!", node_name.c_str(), ci.ip.c_str());
-
-    result = rv::xmlrpc::responseInt(0, "Access Control", 0);
-
-    return false;
-  }
-}
 
 /*[real_ros_port,
    rv_ros_port,
@@ -404,26 +314,6 @@ bool ServerManager::getRVStateCallback(XmlRpc::XmlRpcValue& params, ClientInfo& 
 
     XmlRpc::XmlRpcValue monitors_value;
 
-    // ROS_INFO("Number of Monitors: %d", monitorMap.size());
-
-    std::map<string, Monitor*>::iterator iter;
-    int i = 0;
-    for (iter = monitorMap.begin(); iter != monitorMap.end(); iter++)
-    {
-      string topic = iter->first;
-      Monitor* mp = iter->second;
-
-      XmlRpc::XmlRpcValue monitor_value;
-      monitor_value[0] = mp->getMonitorName();        // name
-      monitor_value[1] = topic;                       // topic
-      monitor_value[2] = mp->getMonitorXmlRpcPort();  // xmlrpc port
-      monitor_value[3] = mp->getMonitorTcpPort();     // tcp port
-      // monitor_value[4]=mp-> //internal subscription port
-
-      monitors_value[i] = monitor_value;
-      i++;
-    }
-
     monitor_info[2] = monitors_value;
 
     result[0] = 1;
@@ -442,85 +332,7 @@ bool ServerManager::getRVStateCallback(XmlRpc::XmlRpcValue& params, ClientInfo& 
     return false;
   }
 }
-bool ServerManager::monitorControlCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result)
-{
-  string node_name = params[0];
-  ROS_INFO("Node %s trying to monitorControl", node_name.c_str());
 
-  std::string command = "monitorcontrol";
-
-  if (acctrl::isCommandAllowed(command, node_name, ci.ip))
-  {
-    string mode = params[1];  // mode: enable/disable
-    XmlRpc::XmlRpcValue monitors = params[2];
-    int size = monitors.size();
-    for (int i = 0; i < size; i++)
-    {
-      std::string monitor = monitors[i];
-      if (mode == "enable")
-      {
-        // enableMonitors
-        monitorControl(monitor, true);
-      }
-      else if (mode == "disable")
-      {
-        monitorControl(monitor, false);
-      }
-    }
-    ROS_INFO("Node %s successfully monitorControl from %s", node_name.c_str(), ci.ip.c_str());
-    return true;
-  }
-  else
-  {
-    ROS_WARN("Node %s is not able to control monitor from %s due to access control!", node_name.c_str(), ci.ip.c_str());
-
-    result = rv::xmlrpc::responseInt(0, "Access Control", 0);
-
-    return false;
-  }
-}
-
-void ServerManager::monitorControl(std::string monitor, bool enable)
-{
-  if (monitor::allMonitors.find(monitor) != monitor::allMonitors.end())
-  {
-    if (enable)
-    {
-      monitor::enabledMonitors.insert(monitor);
-      ROS_INFO("enable monitor: %s", monitor.c_str());
-    }
-    else
-    {
-      monitor::enabledMonitors.erase(monitor);
-      ROS_INFO("disable monitor: %s", monitor.c_str());
-    }
-  }
-  else
-    ROS_INFO("no monitor [%s] exists", monitor.c_str());
-  /*
-     if(rv::monitor::map_monitorTopics.find(monitor)!=rv::monitor::map_monitorTopics.end())
-     {
-        std::set<std::string> topics = rv::monitor::map_monitorTopics.find(monitor)->second;
-        for(std::set<std::string>::iterator it = topics.begin();it!=topics.end();++it)
-        {
-           std::string topic = *it;
-           if(enable)//enable monitor
-           {
-               rv::monitor::monitorTopics.insert(topic);
-           }
-           else //disable monitor
-           {
-              rv::monitor::monitorTopics.erase(topic);
-              //remove existing monitor if exists
-              Monitor *monitor_p = monitorMap.find(topic)->second;
-              //cannot shutdown monitor, otherwise, existing connection between pub/sub would be broken
-              //monitor_p->shutdown();
-              monitorMap.erase(topic);
-           }
-        }
-     }
-  */
-}
 bool ServerManager::getSystemStateCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result)
 {
   // 0: node_name
@@ -658,59 +470,6 @@ bool ServerManager::registerServiceCallback(XmlRpc::XmlRpcValue& params, ClientI
   return false;
   }*/
 }
-Monitor* ServerManager::getMonitor(string topic)
-{
-  Monitor* monitor_p = NULL;
-
-  if (monitorMap.find(topic) != monitorMap.end())
-  {
-    monitor_p = monitorMap.find(topic)->second;
-  }
-  return monitor_p;
-}
-
-void ServerManager::createInterceptors()
-{
-  for (std::map<std::string, std::string>::iterator it = rv::monitor::topicsAndTypes.begin();
-       it != rv::monitor::topicsAndTypes.end(); ++it)
-  {
-    string topic = it->first;
-    string datatype = it->second;
-
-    Monitor* monitor_p = NULL;
-    string monitorname = topic + MONITOR_POSTFIX;
-
-    // ROS_WARN("%s", monitorname.c_str());
-
-    XmlRpc::XmlRpcValue params, result, payload;
-    params[0] = monitorname;
-    params[1] = topic;
-    params[2] = datatype;
-    string m_uri = "";
-    params[3] = m_uri;
-
-    // create a xmlrpcmanager-client for each monitor
-    monitor_p = new Monitor(params, rv_ros_host, monitorname);
-    monitorMap[topic] = monitor_p;
-
-    m_uri = monitor_p->getMonitorXmlRpcUri();
-    params[3] = m_uri;
-
-    bool f = master::execute("registerSubscriber", params, result, payload, true);
-    // ROS_WARN("returns %d", f);
-
-    // start a new thread with the params
-    boost::thread(boost::bind(&Monitor::monitorThreadFunc, monitor_p));
-
-    result[0] = 1;
-    result[1] = "Subscribed to [" + topic + "]";
-    XmlRpc::XmlRpcValue pubs_monitor;
-    pubs_monitor[0] = m_uri;
-    result[2] = pubs_monitor;
-
-    ROS_INFO("Monitor %s successfully registered a subscriber to topic %s", monitorname.c_str(), topic.c_str());
-  }
-}
 
 bool ServerManager::registerSubscriberCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result)
 {
@@ -730,34 +489,12 @@ bool ServerManager::registerSubscriberCallback(XmlRpc::XmlRpcValue& params, Clie
   XmlRpc::XmlRpcValue payload;
   if (acctrl::isSubscriberAllowed(topic, node_name, ci.ip))  // ip address
   {
-    Monitor* monitor_p = NULL;
-
-    if (monitorMap.find(topic) != monitorMap.end())
-    {
-      monitor_p = monitorMap.find(topic)->second;
-      // if(hasMonitor on this topic)
-      // make a monitor here, and send the monitor address to the real master
-
-      result[0] = 1;
-      XmlRpc::XmlRpcValue pubs_monitor;
-      string m_uri = monitor_p->getMonitorXmlRpcUri();
-      pubs_monitor[0] = m_uri;
-      result[1] = "Subscribed to [" + topic + "]";
-      result[2] = pubs_monitor;
-
-      monitor_p->addSubscriber(ci.ip);
-    }
-    else if (rv::monitor::monitorTopics.find(topic) != rv::monitor::monitorTopics.end())
+    if (rv::monitor::monitorTopics.find(topic) != rv::monitor::monitorTopics.end())
     {
       string monitorname = topic + MONITOR_POSTFIX;
 
-      // create a xmlrpcmanager-client for each monitor
-      monitor_p = new Monitor(params, rv_ros_host, monitorname);
-
-      monitorMap[topic] = monitor_p;
-
       // return the uri of the monitor to the subscriber instead
-      string m_uri = monitor_p->getMonitorXmlRpcUri();
+      string m_uri = "XXX"; // monitor_p->getMonitorXmlRpcUri();
       params[3] = m_uri;
       params[0] = monitorname;
 
@@ -771,11 +508,6 @@ bool ServerManager::registerSubscriberCallback(XmlRpc::XmlRpcValue& params, Clie
           pub_uris.push_back(string(payload[i]));
         }
       }
-
-      monitor_p->setPubUris(pub_uris);
-
-      // start a new thread with the params
-      boost::thread(boost::bind(&Monitor::monitorThreadFunc, monitor_p));
 
       int code = result[0];
       string status = result[1];
@@ -795,16 +527,12 @@ bool ServerManager::registerSubscriberCallback(XmlRpc::XmlRpcValue& params, Clie
       pubs_monitor[0] = m_uri;
       result[2] = pubs_monitor;
 
-      monitor_p->addSubscriber(ci.ip);
-
       ROS_INFO("Node %s successfully registered a subscriber to topic %s", node_name.c_str(), topic.c_str());
       return true;
     }
     else
     {  // skip monitoring
-
       master::execute("registerSubscriber", params, result, payload, true);
-
       ROS_INFO("NO MONITORING - Node %s successfully registered a subscriber to topic %s", node_name.c_str(),
                topic.c_str());
       return true;
@@ -838,30 +566,6 @@ bool ServerManager::unregisterSubscriberCallback(XmlRpc::XmlRpcValue& params, Cl
 
   if (acctrl::isSubscriberAllowed(topic, node_name, ci.ip))
   {
-    XmlRpc::XmlRpcValue payload;
-    if (monitorMap.find(topic) != monitorMap.end())
-    {
-      // if this subscriber is the only one for a monitored topic
-      // then kill this monitor
-
-      Monitor* monitor_p = monitorMap.find(topic)->second;
-      if (monitor_p->removeSubscriber(ci.ip) == 0)
-      {
-        // return the uri of the monitor to the subscriber instead
-        string m_uri = monitor_p->getMonitorXmlRpcUri();
-        params[2] = m_uri;
-        params[0] = topic + MONITOR_POSTFIX;
-
-        master::execute("unregisterSubscriber", params, result, payload, true);
-
-        // remove monitor_p from monitorMap
-        monitor_p->shutdown();
-        monitorMap.erase(topic);
-      }
-
-      ROS_INFO("Node %s successfully unregistered as a subscriber to topic %s", node_name.c_str(), topic.c_str());
-      return true;
-    }
   }
   else
   {
