@@ -6,7 +6,12 @@ repo_dir="$(cd "$(dirname "$0")"; pwd)"
 progress() { echo ==== "$@" ; }
 
 trap 'cleanup; echo >&2 "FAILED!"' 0
-cleanup() { progress "Cleaning up"; kill $(jobs -p) >/dev/null 2>&1 || true ; sleep 1 ; }
+cleanup() {
+  progress "Cleaning up"
+  kill $(jobs -p) >/dev/null 2>&1 || true
+  sleep 1
+  kill -9 $(jobs -p) >/dev/null 2>&1 || true
+}
 clean_exit() {
     cleanup
     trap '' 0
@@ -50,8 +55,6 @@ test_against_rvmaster() {
 
     progress "Running tests"
     pytest t/test-against-rvmaster.py
-
-    cleanup
 }
 
 test_without_rvmaster() {
@@ -67,13 +70,34 @@ test_without_rvmaster() {
 
     progress "Running tests"
     pytest t/test-without-rvmaster.py
+}
 
-    cleanup
+test_experiment() {
+    export ROS_MASTER_URI="http://localhost:20022/"
+    export ACCESS_POLICY_PATH="$repo_dir/config/access-policy.cfg"
+
+    progress "Running roscore"
+    roscore -p 20022 >/dev/null  &
+    sleep 1
+
+    progress "publish"
+    rostopic pub chatter std_msgs/String 'Hi /chatter!' & sleep 1
+
+    progress "Running experiment"
+    rosrun rvmonitor experiment & sleep 1
+
+    sleep 2
 }
 
 source devel/setup.bash
 # ( progress test_against_rvmaster ; test_against_rvmaster )
-( progress test_without_rvmaster
-  test_without_rvmaster
+# ( progress test_without_rvmaster
+#   test_without_rvmaster
+# )
+( progress test_experiment
+  test_experiment
 )
+
+
+
 clean_exit 0

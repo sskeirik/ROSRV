@@ -26,7 +26,7 @@ def ros_subscribe(ros_init):
 
 ## Tests without RVMaster
 
-def test_roscore__runmonitored_channel(ros_subscribe):
+def test_roscore__unmonitored_channel(ros_subscribe):
     [ros_init, rate, recieved_messages] = ros_subscribe('unmonitored') 
     check_call(['rostopic', 'pub', '--once', '/unmonitored', 'std_msgs/String', 'Hi!'])
     rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()
