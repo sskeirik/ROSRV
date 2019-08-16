@@ -39,11 +39,11 @@ test_against_rvmaster() {
     sleep 1
 
     progress "Running rvmaster"
-    rosrun rvmaster rvmaster --monitor-topic monitored >/dev/null &
+    rosrun rvmaster rvmaster --monitor-topic /monitored --monitor-topic /chatter >/dev/null &
     sleep 1
 
     progress "Running monitor"
-    rosrun rvmonitor test-isolated-monitor >/dev/null & sleep 1
+    rosrun rvmonitor monitor-single-parameter --with-rvmaster & sleep 1
 
     progress "Running tests"
     pytest t/test-against-rvmaster.py
@@ -60,7 +60,7 @@ test_without_rvmaster() {
     sleep 1
 
     progress "Running monitor"
-    rosrun rvmonitor test-isolated-monitor >/dev/null & sleep 1
+    rosrun rvmonitor test-isolated-monitor & sleep 1
 
     progress "Running tests"
     pytest t/test-without-rvmaster.py
@@ -69,5 +69,6 @@ test_without_rvmaster() {
 }
 
 source devel/setup.bash
+( progress test_without_rvmaster ; test_without_rvmaster )
 ( progress test_against_rvmaster ; test_against_rvmaster )
 clean_exit 0

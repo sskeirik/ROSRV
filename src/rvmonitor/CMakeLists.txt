@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(rvmonitor)
 
 add_compile_options(-std=c++11)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED)
@@ -29,8 +30,8 @@ find_package(catkin REQUIRED COMPONENTS roscpp)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES rvmonitor
+  INCLUDE_DIRS include
+  LIBRARIES rvmonitor
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
 )
@@ -42,9 +43,11 @@ catkin_package(
 include_directories( include )
 
 ## Declare a C++ library
-add_library(librvmonitor
-  src/monitor.cpp
-)
+add_library( librvmonitor
+             src/monitor.cpp
+             src/subscription_shim.cpp
+             src/pub_update_shim.cpp
+           )
 target_include_directories(librvmonitor PUBLIC ${catkin_INCLUDE_DIRS})
 target_link_libraries(librvmonitor ${catkin_LIBRARIES})
 
