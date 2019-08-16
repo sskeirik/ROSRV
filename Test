@@ -44,14 +44,11 @@ test_against_rvmaster() {
     sleep 1
 
     progress "Running rvmaster"
-    rosrun rvmaster rvmaster >/dev/null &
+    rosrun rvmaster rvmaster --monitor-topic monitored >/dev/null &
     sleep 1
 
-    monitor=testSpecOne
-    progress "Enabling $monitor"
-    bin/rosrv.py -enable "$monitor" >/dev/null
-    bin/rosrv.py -list "$monitor"
-    sleep 1
+    progress "Running monitor"
+    rosrun rvmonitor test-isolated-monitor >/dev/null & sleep 1
 
     progress "Running tests"
     pytest t/test-against-rvmaster.py
@@ -90,14 +87,12 @@ test_experiment() {
 }
 
 source devel/setup.bash
-# ( progress test_against_rvmaster ; test_against_rvmaster )
-# ( progress test_without_rvmaster
-#   test_without_rvmaster
+( progress test_against_rvmaster ; test_against_rvmaster )
+# ( progress test_without_rvmaster ; test_without_rvmaster )
+# ( progress test_experiment
+#   test_experiment
 # )
-( progress test_experiment
-  test_experiment
-)
-
+# 
 
 
 clean_exit 0
