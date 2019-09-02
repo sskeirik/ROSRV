@@ -20,6 +20,17 @@ namespace monitor {
   std::set<std::string> monitorTopics;
 }
 
+// TODO: Fix project structure
+string getMonitorSubscribedTopicForTopic(const std::string& topic) {
+    return "/rv/monitored" + topic;
+}
+string getMonitorAdvertisedTopicForTopic(const std::string& topic) {
+    return topic;
+}
+
+bool ServerManager::isMonitored(std::string const& topic) {
+  return rv::monitor::monitorTopics.find(topic) != rv::monitor::monitorTopics.end();
+}
 
 ServerManagerPtr g_server_manager;
 boost::mutex g_server_manager_mutex;
@@ -43,7 +54,6 @@ const ServerManagerPtr& ServerManager::instance()
 ServerManager::ServerManager() : shutting_down_(false)
 {
   acctrl::init();  // initialize access control
-  // rv::monitor::initMonitorTopics();//initialize monitor topics
   ros::initInternalTimerManager();
 }
 ServerManager::~ServerManager()
@@ -478,71 +488,20 @@ bool ServerManager::registerSubscriberCallback(XmlRpc::XmlRpcValue& params, Clie
   string datatype = params[2];
   string uri = params[3];
 
-  // string host;
-  // uint32_t port;
-  // if(!ros::network::splitURI(uri,host,port))
-  // return false;
-
   ROS_INFO("Node %s trying to subscribe to topic %s from %s with datatype %s", node_name.c_str(), topic.c_str(),
            ci.ip.c_str(), datatype.c_str());
 
   XmlRpc::XmlRpcValue payload;
-  if (acctrl::isSubscriberAllowed(topic, node_name, ci.ip))  // ip address
-  {
-    if (rv::monitor::monitorTopics.find(topic) != rv::monitor::monitorTopics.end())
-    {
-      string monitorname = topic + MONITOR_POSTFIX;
-
-      // return the uri of the monitor to the subscriber instead
-      string m_uri = "XXX"; // monitor_p->getMonitorXmlRpcUri();
-      params[3] = m_uri;
-      params[0] = monitorname;
-
-      master::execute("registerSubscriber", params, result, payload, true);
-
-      vector<string> pub_uris;
-      for (int i = 0; i < payload.size(); i++)
-      {
-        if (payload[i] != rv::XMLRPCManager::instance()->getServerURI())
-        {
-          pub_uris.push_back(string(payload[i]));
-        }
-      }
-
-      int code = result[0];
-      string status = result[1];
-      // string pubs[] = result[2];
-      /*string pubs="";
-      for (int i = 0; i < payload.size(); i++)
-      pubs = pubs+" "+string(payload[i]);
-      */
-      // ROS_INFO("Node %s received code %d with status %s publisher %s",
-      // node_name.c_str(),code,status.c_str(),pubs.c_str());
-      ROS_INFO("Node %s received code %d with status %s", node_name.c_str(), code, status.c_str());
-
-      result[0] = 1;
-      // result[1]="Subscribed to ["+topic+"]";
-      // string m_uri = monitor_p->getMonitorXmlRpcUri();
-      XmlRpc::XmlRpcValue pubs_monitor;
-      pubs_monitor[0] = m_uri;
-      result[2] = pubs_monitor;
-
-      ROS_INFO("Node %s successfully registered a subscriber to topic %s", node_name.c_str(), topic.c_str());
-      return true;
-    }
-    else
-    {  // skip monitoring
-      master::execute("registerSubscriber", params, result, payload, true);
-      ROS_INFO("NO MONITORING - Node %s successfully registered a subscriber to topic %s", node_name.c_str(),
-               topic.c_str());
-      return true;
-    }
-  }
-  else
+  if (!acctrl::isSubscriberAllowed(topic, node_name, ci.ip))  // ip address
   {
     ROS_WARN("Node %s is not able to subscribe to topic %s due to access control!", node_name.c_str(), topic.c_str());
     return false;
   }
+
+  master::execute("registerSubscriber", params, result, payload, true);
+
+  std::cerr << "result: " << result << std::endl;
+  return true;
 }
 
 bool ServerManager::unregisterServiceCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result)
@@ -579,40 +538,89 @@ bool ServerManager::unregisterSubscriberCallback(XmlRpc::XmlRpcValue& params, Cl
     return false;
   }
 }
-bool ServerManager::registerPublisherCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result)
+
+using namespace XmlRpc;
+
+bool lookupNode(string const& caller_id, string const& node_name, XmlRpcValue& ret)
 {
-  string node_name = params[0];
-  string topic = params[1];
-  string datatype = params[2];
-  string uri = params[3];
-
-  // string host;
-  // uint32_t port;
-  // if(!ros::network::splitURI(uri,host,port))
-  // return false;
-
-  ROS_INFO("Node %s trying to publish to topic %s from %s", node_name.c_str(), topic.c_str(), ci.ip.c_str());
-  // ROS_INFO("Real ip address: %s  port: %d", ci.ip.c_str(), ci.port);
-
-  if (acctrl::isPublisherAllowed(topic, node_name, ci.ip))
+  XmlRpcValue request; request[0] = caller_id; request[1] = node_name;
+  XmlRpcValue response;
+  XmlRpcValue payload;
+  master::execute("lookupNode", request, response, payload, false);
+  if (int(response[0]) != 1)
   {
-    XmlRpc::XmlRpcValue payload;
-    master::execute("registerPublisher", params, result, payload, true);
-
-    ROS_INFO("Node %s successfully registered as a publisher to topic %s", node_name.c_str(), topic.c_str());
-
-    return true;
-  }
-  else
-  {
-    ROS_WARN("Node %s is not able to publish to topic %s due to access control!", node_name.c_str(), topic.c_str());
-
-    // return bad result to the publisher??
-
-    result = rv::xmlrpc::responseInt(0, "Access Control", 0);
-
+    ROS_WARN_STREAM("Could not lookup node: '" << node_name << "' " << response[1] );
     return false;
   }
+  ret = response[2];
+  std::cerr << "lookNode: " << node_name << " --- " << response << std::endl;
+  return true;
+}
+
+bool getPublishersForTopic(string const& caller_id, string const& topic, XmlRpcValue& ret) {
+  XmlRpcValue request; request[0] = caller_id;
+  XmlRpcValue response;
+  XmlRpcValue payload;
+  master::execute("getSystemState", request, response, payload, false);
+  std::cerr << "getSystemState: " << response << std::endl;
+  ROS_ASSERT(response.getType() == XmlRpc::XmlRpcValue::TypeArray);
+  ROS_ASSERT(response.size() == 3);
+  XmlRpcValue& systemState = response[2];
+  std::cerr << "   systemState: " << systemState<< std::endl;
+  XmlRpcValue& publish_topics = systemState[0];
+  ROS_ASSERT(publish_topics.getType() == XmlRpc::XmlRpcValue::TypeArray);
+  std::cerr << "   publish_topics: " << publish_topics << std::endl;
+  std::cerr << "   publish_topics.size(): " << publish_topics.size() << std::endl;
+  std::cerr << "looking for topic: " << topic << std::endl;
+
+//  for (publish_topic: publish_topics) {
+  for (size_t i = 0; i < publish_topics.size(); i++) {
+    XmlRpcValue& publish_topic = publish_topics[i];
+    if (topic != string(publish_topic[0])) continue;
+
+    XmlRpcValue& publishers = publish_topic[1];
+    ret.setSize(publishers.size());
+    for (size_t j = 0; j < publishers.size(); j++) {
+      XmlRpcValue& publisher = publishers[j]; 
+      lookupNode(caller_id, publisher, ret[j]);
+    }
+    return true;
+  }
+}
+
+bool ServerManager::registerPublisherCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result)
+{
+  string& node_name = params[0];
+  string& topic = params[1];
+  string& datatype = params[2];
+  string& uri = params[3];
+
+  if (!acctrl::isPublisherAllowed(topic, node_name, ci.ip))
+  {
+    ROS_WARN("Node %s is not able to publish to topic %s due to access control!", node_name.c_str(), topic.c_str());
+    result = rv::xmlrpc::responseInt(0, "Access Control", 0);
+    return false;
+  }
+
+  ROS_INFO("Node %s trying to publish to topic %s from %s", node_name.c_str(), topic.c_str(), ci.ip.c_str());
+  bool is_monitored = isMonitored(topic);
+  if (is_monitored && node_name != "/rvmonitor") {
+    string monitor_topic = getMonitorSubscribedTopicForTopic(topic);
+    ROS_INFO("Topic %s is monitored. Registering to %s instead.", topic.c_str(), monitor_topic.c_str());
+    topic = monitor_topic;
+  }
+
+  XmlRpc::XmlRpcValue payload;
+  master::execute("registerPublisher", params, result, payload, true);
+
+//  if (is_monitored) {
+//    getPublishersForTopic(node_name, topic, result[2]);
+//  }
+
+  std::cerr << "RESPONDING _---------------------- " << result << std::endl;
+
+  ROS_INFO("Node %s successfully registered as a publisher to topic %s", node_name.c_str(), topic.c_str());
+  return true;
 }
 
 bool ServerManager::unregisterPublisherCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci,

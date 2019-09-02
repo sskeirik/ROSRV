@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 get_filename_component(PARENT_DIR ${CMAKE_SOURCE_DIR} PATH)
 
-find_package(catkin REQUIRED COMPONENTS roscpp rospy)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy rvmonitor)
 find_package(Boost REQUIRED COMPONENTS regex program_options)
 catkin_package( INCLUDE_DIRS include )
 
