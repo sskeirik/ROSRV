@@ -4,6 +4,7 @@
 #include <string>
 #include <functional>
 #include <ros/ros.h> // TODO: Use more specific headers
+#include <rv/subscription_shim.h>
 
 namespace rv {
 namespace monitor {
@@ -16,14 +17,16 @@ struct MonitorTopic
 {
     ros::Publisher  publisher;
     ros::Subscriber subscriber;
+    rv::SubscriptionShim subscription_shim;
 
     MonitorTopic(ros::NodeHandle& n, std::string const& topic, uint queue_len)
-        : publisher(n.advertise<MessageType>(getMonitorAdvertisedTopicForTopic(topic), queue_len))
+        : publisher(n.advertise<MessageType>(getMonitorAdvertisedTopicForTopic(topic), queue_len, true))
         , subscriber( n.subscribe( getMonitorSubscribedTopicForTopic(topic)
                                  , queue_len
                                  , &MonitorTopic<MessageType>::callback
                                  , this
                     )            )
+        , subscription_shim(topic, getMonitorSubscribedTopicForTopic(topic))
     {
     }
 

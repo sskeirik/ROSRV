@@ -8,14 +8,30 @@
 #include <iostream>
 #include <sstream>
 
+namespace rv { namespace monitor {
+  extern std::set<std::string> monitorTopics;
+}}
+
 int main(int argc, char **argv)
 {
+  std::cerr << "Parsing args" << std::endl;
+  for (int i = 1; i < argc; i++) {
+    std::cerr << "i: " << i << std::endl;
+    std::cerr << "argv: " << argv[i] << std::endl;
+    if (argv[i] == std::string("--monitor-topic")) {
+      i++;
+      std::cerr << "argv: " << argv[i] << std::endl;
+      if (i == argc) throw std::runtime_error("--monitor-topic requires one argument");
+      rv::monitor::monitorTopics.insert(argv[i]);
+    }
+  }
+
   boost::shared_ptr<rv::XMLRPCManager> xmlrpc_manager_ = rv::XMLRPCManager::instance();
   boost::shared_ptr<rv::ServerManager> server_manager_ = rv::ServerManager::instance();
 
-  //rv::master::init(argc,argv,"rvmaster");
   ros::M_string remappings;
   rv::master::init(remappings);
+
 
   //--- ros master api
 

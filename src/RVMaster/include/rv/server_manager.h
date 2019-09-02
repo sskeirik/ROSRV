@@ -50,6 +50,8 @@ public:
   bool searchParamCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result);
   bool hasParamCallback(XmlRpc::XmlRpcValue& params, ClientInfo& ci, XmlRpc::XmlRpcValue& result);
 
+  bool isMonitored(std::string const& topic);
+
 private:
   bool requestTopic(const std::string& topic, XmlRpc::XmlRpcValue& protos, XmlRpc::XmlRpcValue& ret);
   volatile bool shutting_down_;
