@@ -85,7 +85,7 @@ public class CppGeneratorTest {
    @Before
    public void resetGenerators(){
        HeaderGenerator.reset();
-       CppGenerator.reset();
+       CppGenerator.printer = new SourcePrinter();
    }
 
     @Test
