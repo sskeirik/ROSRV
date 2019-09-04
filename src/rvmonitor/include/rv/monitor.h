@@ -12,21 +12,38 @@ namespace monitor {
 std::string getMonitorSubscribedTopicForTopic(const std::string& topic);
 std::string getMonitorAdvertisedTopicForTopic(const std::string& topic);
 
-template<class MessageType>
-struct MonitorTopic
-{
+struct MonitorTopicErased {
     ros::Publisher  publisher;
     ros::Subscriber subscriber;
     rv::SubscriptionShim subscription_shim;
 
+    MonitorTopicErased(std::string const& topic, ros::Publisher pub, ros::Subscriber sub)
+        : publisher(pub)
+        , subscriber(sub)
+        , subscription_shim(topic, getMonitorSubscribedTopicForTopic(topic))
+    {
+    }
+
+    virtual ~MonitorTopicErased() = default;
+};
+
+using MonitorTopicErasedPtr = boost::shared_ptr<MonitorTopicErased>;
+
+template<class MessageType>
+struct MonitorTopic
+    : MonitorTopicErased
+{
+    using Ptr = boost::shared_ptr<MonitorTopic<MessageType>>;
+
     MonitorTopic(ros::NodeHandle& n, std::string const& topic, uint queue_len)
-        : publisher(n.advertise<MessageType>(getMonitorAdvertisedTopicForTopic(topic), queue_len, true))
-        , subscriber( n.subscribe( getMonitorSubscribedTopicForTopic(topic)
+        : MonitorTopicErased
+            ( topic
+            , n.advertise<MessageType>(getMonitorAdvertisedTopicForTopic(topic), queue_len, true)
+            , n.subscribe( getMonitorSubscribedTopicForTopic(topic)
                                  , queue_len
                                  , &MonitorTopic<MessageType>::callback
                                  , this
-                    )            )
-        , subscription_shim(topic, getMonitorSubscribedTopicForTopic(topic))
+            )            )
     {
     }
 
@@ -49,6 +66,30 @@ private:
     std::vector<std::function<void (MessageType&)>> m_events;
 };
 
+struct Monitor {
+    template<class MessageType>
+    typename MonitorTopic<MessageType>::Ptr withTopic(std::string const& topic) {
+        typename MonitorTopic<MessageType>::Ptr ret = nullptr;
+        if (monitored_topics.find(topic) == monitored_topics.end()) {
+            unsigned int const queue_len = 1000;
+            ret = boost::make_shared<MonitorTopic<MessageType>>(node_handle, topic, queue_len);
+            monitored_topics.insert({topic, ret});
+        }
+        else {
+            ret = boost::dynamic_pointer_cast<MonitorTopic<MessageType>>(monitored_topics.at(topic));
+        }
+    }
+
+    bool isMonitoring() {
+
+    }
+
+    void enable_rvmaster_shims() {
+    };
+    ros::NodeHandle node_handle;
+
+    std::map<std::string, MonitorTopicErasedPtr> monitored_topics;
+};
 
 }
 }

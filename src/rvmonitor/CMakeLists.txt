@@ -45,6 +45,7 @@ include_directories( include )
 add_library( librvmonitor
              src/monitor.cpp
              src/subscription_shim.cpp
+             src/pub_update_shim.cpp
            )
 target_include_directories(librvmonitor PUBLIC ${catkin_INCLUDE_DIRS})
 target_link_libraries(librvmonitor ${catkin_LIBRARIES})
