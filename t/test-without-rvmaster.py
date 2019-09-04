@@ -33,14 +33,14 @@ def test_roscore__unmonitored_channel(ros_subscribe):
     assert(recieved_messages == ['Hi!'])
 
 # TODO: Test framework does not allow running without monitor
-# def test_roscore__rmonitored_channel__no_monitor_running(ros_subscribe):
+# def test_roscore__monitored_channel__no_monitor_running(ros_subscribe):
 #     [ros_init, rate, recieved_messages] = ros_subscribe('monitored') 
 #     check_call(['rostopic', 'pub', '--once', '/chatter', 'std_msgs/String', 'Hi!'])
 #     rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()
 #     assert(recieved_messages == [])
 
-def test_roscore__rmonitored_channel__monitor_running(ros_subscribe):
-    [ros_init, rate, recieved_messages] = ros_subscribe('chatter') 
+def test_roscore__monitored_channel__monitor_running(ros_subscribe):
+    [ros_init, rate, recieved_messages] = ros_subscribe('/chatter') 
     check_call(['rostopic', 'pub', '--once', '/rv/monitored/chatter', 'std_msgs/String', 'Hi!'])
     check_call(['rostopic', 'pub', '--once', '/rv/monitored/chatter', 'std_msgs/String', 'Hi!'])
     rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()

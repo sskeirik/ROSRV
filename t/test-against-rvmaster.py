@@ -27,7 +27,6 @@ def ros_subscribe(ros_init):
     return subscribe
 
 def test_unmonitored_channel(ros_subscribe):
-    print("unm", file=sys.stderr)
     print("1", file=sys.stderr)
     [ros_init, rate, recieved_messages] = ros_subscribe('unmonitored') 
     print("2", file=sys.stderr)

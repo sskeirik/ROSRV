@@ -1,10 +1,16 @@
 #include <cstring>
 #include <string>
 #include "ros/ros.h"
+#include <iostream>
 
 testSpecOne() {
     string const suffix = "RV";
     int messages_intercepted = 0;
+
+    event chatter_00_cerr(std::string& msg) /chatter std_msgs/String '{data:msg}'
+    {
+        std::cerr << "Recieved message: " << msg << std::endl;
+    }
 
     event chatter_0_append_suffix(std::string& msg) /chatter std_msgs/String '{data:msg}'
     {

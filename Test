@@ -5,7 +5,7 @@ repo_dir="$(cd "$(dirname "$0")"; pwd)"
 
 progress() { echo ==== "$@" ; }
 
-trap 'cleanup; echo >&2 "FAILED!"' 0
+# trap 'cleanup; echo >&2 "FAILED!"' 0
 cleanup() {
   progress "Cleaning up"
   kill $(jobs -p) >/dev/null 2>&1 || true
@@ -44,7 +44,7 @@ test_against_rvmaster() {
     sleep 1
 
     progress "Running rvmaster"
-    rosrun rvmaster rvmaster --monitor-topic monitored >/dev/null &
+    rosrun rvmaster rvmaster --monitor-topic /chatter &
     sleep 1
 
     progress "Running monitor"
@@ -59,8 +59,7 @@ test_without_rvmaster() {
     export ACCESS_POLICY_PATH="$repo_dir/config/access-policy.cfg"
 
     progress "Running roscore"
-    roscore -p 20022 >/dev/null  &
-    sleep 1
+    roscore -p 20022 >/dev/null & sleep 1
 
     progress "Running monitor"
     rosrun rvmonitor test-isolated-monitor >/dev/null & sleep 1
@@ -69,30 +68,34 @@ test_without_rvmaster() {
     pytest t/test-without-rvmaster.py
 }
 
-test_experiment() {
-    export ROS_MASTER_URI="http://localhost:20022/"
-    export ACCESS_POLICY_PATH="$repo_dir/config/access-policy.cfg"
-
-    progress "Running roscore"
-    roscore -p 20022 >/dev/null  &
-    sleep 1
-
-    progress "publish"
-    rostopic pub chatter std_msgs/String 'Hi /chatter!' & sleep 1
-
-    progress "Running experiment"
-    rosrun rvmonitor experiment & sleep 1
-
-    sleep 2
-}
-
 source devel/setup.bash
-( progress test_against_rvmaster ; test_against_rvmaster )
-# ( progress test_without_rvmaster ; test_without_rvmaster )
-# ( progress test_experiment
-#   test_experiment
-# )
+
+# export ROS_MASTER_URI="http://localhost:11311/"
+# export REAL_MASTER_URI="http://localhost:20022/"
+# export ACCESS_POLICY_PATH="$repo_dir/config/access-policy.cfg"
+# progress execing
+# exec "$@"
+# exit 0
 # 
+# ( 
+#     export ROS_MASTER_URI="http://localhost:11311/"
+#     export REAL_MASTER_URI="http://localhost:20022/"
+#     export ACCESS_POLICY_PATH="$repo_dir/config/access-policy.cfg"
+# 
+#     progress "Running roscore"
+#     ROS_MASTER_URI="$REAL_MASTER_URI" roscore -p 20022  >/dev/null & sleep 1
+#     progress "Running rvmaster"
+#     (rosrun rvmaster rvmaster --monitor-topic /chatter ; echo rvmaster exited: $?) & sleep 1
+#     progress "Running monitor"
+#     rosrun rvmonitor test-isolated-monitor & sleep 1
+#     progress "Running rostopic"
+#     rostopic pub /chatter std_msgs/String 'Hi /chatter!' & sleep 1
+# 
+#     cleanup
+# )
+
+( progress test_against_rvmaster ; test_against_rvmaster ; cleanup )
+# ( progress test_without_rvmaster ; test_without_rvmaster ; cleanup )
 
 
 clean_exit 0
