@@ -8,4 +8,4 @@ class_path="$rosmop_jar":"$RVMONITOR/*":"$RVMONITOR/plugins/*"
 
 [ -f "$rosmop_jar" ] \
     || { echo >&2 "$0: jar not built. Run \`mvn package\`"; exit 1 ; }
-exec java -cp "$class_path" rosmop.Main "$@"
+exec java -ea -cp "$class_path" rosmop.Main "$@"
