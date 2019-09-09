@@ -101,18 +101,22 @@ target_link_libraries(librvmonitor ${catkin_LIBRARIES})
 
 ## monitor
 
-add_custom_command(
-    OUTPUT ${PROJECT_BINARY_DIR}/isolated-monitor/rvmonitor.cpp
-           ${PROJECT_BINARY_DIR}/isolated-monitor/rvmonitor.h
-    COMMAND mkdir -p ${PROJECT_BINARY_DIR}/isolated-monitor/ &&
-            rosmop --output-prefix ${PROJECT_BINARY_DIR}/isolated-monitor/rvmonitor
-                   --monitor-as-node
-                   ${PROJECT_SOURCE_DIR}/rvmonitor.rv
-    DEPENDS rvmonitor.rv
-)
-add_executable(test-isolated-monitor ${PROJECT_BINARY_DIR}/isolated-monitor/rvmonitor.cpp)
-target_include_directories(test-isolated-monitor PRIVATE ${PROJECT_BINARY_DIR}/isolated-monitor/)
-target_link_libraries(test-isolated-monitor librvmonitor)
+function(build_monitor spec_file monitor_name)
+  set(output_prefix ${PROJECT_BINARY_DIR}/monitors/${monitor_name})
+  add_custom_command(
+      OUTPUT ${output_prefix}.cpp ${output_prefix}.h
+      COMMAND mkdir -p ${PROJECT_BINARY_DIR}/monitors/ &&
+	      rosmop --output-prefix ${output_prefix}
+		     --monitor-as-node
+		     ${spec_file}
+      DEPENDS ${spec_file}
+  )
+  add_executable(${monitor_name} ${output_prefix}.cpp)
+  target_include_directories(${monitor_name} PRIVATE ${PROJECT_BINARY_DIR}/monitors/)
+  target_link_libraries(${monitor_name} librvmonitor)
+endfunction()
+
+build_monitor(${PROJECT_SOURCE_DIR}/specs/single-parameter.rv monitor-single-parameter)
 
 ## Add gtest based cpp test target and link libraries
 # catkin_add_gtest(${PROJECT_NAME}-test test/test_rvmonitor.cpp)
