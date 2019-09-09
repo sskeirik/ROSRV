@@ -117,6 +117,7 @@ function(build_monitor spec_file monitor_name)
 endfunction()
 
 build_monitor(${PROJECT_SOURCE_DIR}/specs/single-parameter.rv monitor-single-parameter)
+build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-parameters.rv monitor-multiple-parameters)
 
 ## Add gtest based cpp test target and link libraries
 # catkin_add_gtest(${PROJECT_NAME}-test test/test_rvmonitor.cpp)
