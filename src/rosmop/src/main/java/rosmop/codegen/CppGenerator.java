@@ -2,13 +2,7 @@ package rosmop.codegen;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Comparator;
+import java.util.*;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -41,13 +35,6 @@ public class CppGenerator {
         return HeaderGenerator.addedTopics.get(topic).get(0).classifyMsgType();
     }
 
-    public static Variable getParameterForEvent(Event e) {
-        ROSEvent event = (ROSEvent) e;
-        if (event.getParameters() == null) return null;
-        assert event.getParameters().size() == 1 : "ROS Events must have 1 parameters.";
-        return event.getParameters().get(0);
-    }
-
     public static String getTopicForEvent(Event e) {
         ROSEvent event = (ROSEvent) e;
         return event.getTopic();
@@ -55,10 +42,6 @@ public class CppGenerator {
 
     public static String callbackNameForEvent(Event e) {
         return "callback_" + e.getName();
-    }
-
-    public static String accessorNameForEvent(Event e) {
-        return "accessor_" + e.getName();
     }
 
     public static String getPatternForParameter(Event e, Variable v) {
@@ -76,6 +59,20 @@ public class CppGenerator {
         List<Event> events = new ArrayList(cspec.getEvents().values());
         events.sort(Comparator.comparing(x -> x.getName()));
         return events;
+    }
+    public static void printParameterBindingsForEvent(ROSEvent event) {
+        for (Variable parameter : event.getParameters()) {
+            printer.printLn();
+
+            if (parameter.getType().endsWith("[]")) {
+                printer.print("vector<" + parameter.getType().replace("[]", "")
+                        + ">" + "& " + parameter.getDeclaredName() + " = ");
+            } else {
+                printer.print(parameter.getType() + "& " + parameter.getDeclaredName() + " = ");
+            }
+            printer.print("message" + "." + event.getPattern().get(parameter.getDeclaredName()) + ";");
+            printer.printLn();
+        }
     }
 
     public static void generateCpp(HashMap<CSpecification, LogicPluginShellResult> toWrite,
@@ -115,12 +112,15 @@ public class CppGenerator {
 
             for (Event event : getEventsForCSpecification(cspec)) {
                 printer.printLn("/* " + event.getName() + " */");
-                Variable param = getParameterForEvent(event);
-                printer.printLn("void " + callbackNameForEvent(event) + "(" +
-                                    param.getType() + " " + param.getDeclaredName() +  ")");
-                printer.printLn(event.getAction());
-                printer.printLn(param.getType()  + " " + accessorNameForEvent(event) + "(" + getMessageTypeForTopic(getTopicForEvent(event)) + "& message)" );
-                printer.printLn("{ return message." +  getPatternForParameter(event, param) + "; }");
+                printer.printLn("void " + callbackNameForEvent(event) +
+                                "(" + getMessageTypeForTopic(getTopicForEvent(event)) + "& message)");
+                printer.printLn("{");
+                printer.indent();
+                printParameterBindingsForEvent((ROSEvent) event);
+                String action = event.getAction();
+                Arrays.stream(action.substring(1,action.length()-1).split("\n"))
+                      .forEach(x -> printer.printLn(x.trim()));
+                printer.unindent(); printer.printLn("}");
             }
 
             printer.unindent(); printer.printLn("};");
@@ -154,9 +154,7 @@ public class CppGenerator {
 
                 printer.printLn(getCNameForTopic(topic) + ".registerEvent(" +
                        "&" + cspec.getSpecName() +
-                   ", &" + "rosmop_generated::" + cspec.getSpecName() + "::" + callbackNameForEvent(event) +
-                   ", &" + "rosmop_generated::" + cspec.getSpecName() + "::" + accessorNameForEvent(event) +
-                      ");");
+                   ", &" + "rosmop_generated::" + cspec.getSpecName() + "::" + callbackNameForEvent(event) + ");");
             }
         }
         printer.unindent(); printer.printLn("}");

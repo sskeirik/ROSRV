@@ -27,14 +27,13 @@ struct MonitorTopic
     {
     }
 
-    template<class T, class DatumType>
+    template<class T>
     void registerEvent( T* owner
-                      , void (T::*callback)(DatumType) 
-                      , DatumType (T::*getDatum)(MessageType&)
+                      , void (T::*callback)(MessageType&)
                       )
     {
-        m_events.push_back([owner, callback, getDatum](MessageType& msg) -> void
-                               { (owner->*callback)((owner->*getDatum)(msg)); });
+        m_events.push_back([owner, callback](MessageType& msg) -> void
+                               { (owner->*callback)(msg); });
     }
 
     void callback(boost::shared_ptr<const MessageType> ptr) {
