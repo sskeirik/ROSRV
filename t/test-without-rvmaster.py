@@ -96,3 +96,11 @@ def test_roscore__monitored_multiparam_channel(simple_pipeline, launch_monitor):
     simple_pipeline(test_packets)
     check(with_monitor, ['(105.0,110.0,115.0,0.5)'], test_packets[0].recieved)
 
+def test_roscore__monitored_multiparam_multichannel(simple_pipeline, launch_monitor):
+    with_monitor = launch_monitor('monitor-multiple-channels')
+    test_packets = [ ColorRGBAPacket('/color_chatter', [str(ColorRGBA(100 ,100 ,100 ,0.5))], prefix)
+                   , StringPacket('/chatter', ['Hi!'], prefix)]
+
+    simple_pipeline(test_packets)
+    check(with_monitor, ['(105.0,110.0,115.0,0.5)'], test_packets[0].recieved)
+    check(with_monitor, ['Hi!RV'], test_packets[1].recieved)
