@@ -144,8 +144,13 @@ public class CppGenerator {
 
         printer.printLn();
         printer.printLn("Monitor()");
+        int i = 0;
         for (String topic : getTopics()) {
-            printer.printLn("    : " + getCNameForTopic(topic) + "(n, \"" + topic + "\", 1000)");
+            if(i == 0)
+                printer.printLn("    : " + getCNameForTopic(topic) + "(n, \"" + topic + "\", 1000)");
+            else
+                printer.printLn("    , " + getCNameForTopic(topic) + "(n, \"" + topic + "\", 1000)");
+            i += 1;
         }
         printer.printLn("{"); printer.indent();
         for (CSpecification cspec : toWrite.keySet()) {
