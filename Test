@@ -69,5 +69,5 @@ test_without_rvmaster() {
 }
 
 source devel/setup.bash
-( progress test_against_rvmaster ; test_against_rvmaster )
+( progress test_without_rvmaster ; test_without_rvmaster )
 clean_exit 0
