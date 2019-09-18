@@ -57,50 +57,47 @@ def simple_pipeline(ros_init):
             rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()
     return run_simple_pipeline
 
-@pytest.fixture(params=[True, False], ids=['monitor_running', 'no_monitor_running'])
+@pytest.fixture()
 def launch_monitor(request):
     def run_launch_monitor(monitor_name):
-        if(request.param):
-            monitor = Popen(['/usr/bin/env', 'rosrun', 'rvmonitor', monitor_name])
-            def cleanup():
-                monitor.terminate()
-            request.addfinalizer(cleanup)
-            return True
-        else:
-            return False
+        monitor = Popen(['/usr/bin/env', 'rosrun', 'rvmonitor', monitor_name])
+        def cleanup():
+            monitor.terminate()
+        request.addfinalizer(cleanup)
+        return True
     return run_launch_monitor
 
+prefix = 'rv/monitored'
+
 # Tests
+# =====
+
 def test_roscore__unmonitored_channel_pipeline(simple_pipeline):
     test_packets = [StringPacket('/unmonitored', ['Hi!'],  '')]
     simple_pipeline(test_packets)
     assert ['Hi!'] == test_packets[0].recieved
 
-def check(with_monitor, expected, actual):
-    if(with_monitor):
-        assert expected == actual
-    else:
-        assert [] == actual
-
-prefix = 'rv/monitored'
+def test_roscore__monitored_channel__no_monitor_running(simple_pipeline):
+    test_packets = [StringPacket('/chatter', ['Hi!', 'Hi!'], prefix)]
+    simple_pipeline(test_packets)
+    assert([] == test_packets[0].recieved)
 
 def test_roscore__monitored_channel(simple_pipeline, launch_monitor):
     with_monitor = launch_monitor('monitor-single-parameter')
     test_packets = [StringPacket('/chatter', ['Hi!', 'Hi!'], prefix)]
     simple_pipeline(test_packets)
-    check(with_monitor, ['Hi!RV1', 'Hi!RV2'], test_packets[0].recieved)
+    assert(['Hi!RV1', 'Hi!RV2'] == test_packets[0].recieved)
 
 def test_roscore__monitored_multiparam_channel(simple_pipeline, launch_monitor):
     with_monitor = launch_monitor('monitor-multiple-parameters')
     test_packets = [ColorRGBAPacket('/color_chatter', [str(ColorRGBA(100 ,100 ,100 ,0.5))], prefix)]
     simple_pipeline(test_packets)
-    check(with_monitor, ['(105.0,110.0,115.0,0.5)'], test_packets[0].recieved)
+    assert(['(105.0,110.0,115.0,0.5)'] == test_packets[0].recieved)
 
 def test_roscore__monitored_multiparam_multichannel(simple_pipeline, launch_monitor):
     with_monitor = launch_monitor('monitor-multiple-channels')
     test_packets = [ ColorRGBAPacket('/color_chatter', [str(ColorRGBA(100 ,100 ,100 ,0.5))], prefix)
                    , StringPacket('/chatter', ['Hi!'], prefix)]
-
     simple_pipeline(test_packets)
-    check(with_monitor, ['(105.0,110.0,115.0,0.5)'], test_packets[0].recieved)
-    check(with_monitor, ['Hi!RV'], test_packets[1].recieved)
+    assert(['(105.0,110.0,115.0,0.5)'] == test_packets[0].recieved)
+    assert(['Hi!RV']                   == test_packets[1].recieved)
