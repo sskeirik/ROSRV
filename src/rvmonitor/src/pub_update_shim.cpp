@@ -1,6 +1,7 @@
 #include "rv/pub_update_shim.h"
 #include "ros/ros.h"
 #include "ros/xmlrpc_manager.h"
+#include "rv/monitor.h"
 
 #define private public
 #define protected public
@@ -12,12 +13,14 @@ using namespace rv;
 using namespace monitor;
 using namespace ros;
 using namespace XmlRpc;
+using namespace std;
 
-PubUpdateShim::PubUpdateShim()
+PubUpdateShim::PubUpdateShim(Monitor& m)
   : topic_manager()
+  , monitor(m)
 {
   XMLRPCManagerPtr xmlrpc_manager = XMLRPCManager::instance();
-//  xmlrpc_manager->bind("publisherUpdate", boost::bind(&TopicManager::pubUpdateCallback, this, _1, _2));
+  xmlrpc_manager->bind("publisherUpdate", boost::bind(&PubUpdateShim::pubUpdateCallback, this, _1, _2));
 
   TopicManagerPtr topic_manager = TopicManager::instance();
 }
@@ -39,12 +42,16 @@ void PubUpdateShim::pubUpdateCallback(XmlRpcValue& params, XmlRpcValue& result)
   }
 }
 
-bool pubUpdate(std::string topic, const std::vector<std::string> &pubs)
+bool PubUpdateShim::pubUpdate(std::string topic, const std::vector<std::string> &uris)
 {
-  if (isMonitored(topic)) {
+  std::cerr << "_-------------------" << __FUNCTION__ << "-----------------\n";
+  if (monitor.isMonitored(topic)) {
     topic = getMonitorSubscribedTopicForTopic(topic);
-    // ...
+    for (auto uri: uris) {
+        monitor.monitored_topics.at(topic)->subscription_shim.connect(uri);
+    }
+    return true;
   }
 
-  return topic_manager->pubUpdate(topic, pubs);
+  return topic_manager->pubUpdate(topic, uris);
 }

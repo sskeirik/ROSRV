@@ -123,57 +123,34 @@ public class CppGenerator {
                 printer.unindent(); printer.printLn("}");
             }
 
+            // Spec's constructor
+            printer.printLn();
+            printer.printLn(cspec.getSpecName() + "(rv::monitor::Monitor& monitor) {");
+            printer.indent();
+            for (Event event : getEventsForCSpecification(cspec)) {
+                String topic = getTopicForEvent(event);
+                printer.printLn("monitor.registerEvent<" + getMessageTypeForTopic(topic) + ">(" +
+                                          "\"" + topic + "\", this, "
+                                          + " &" + cspec.getSpecName() + "::" + callbackNameForEvent(event)
+                                          + ");");
+            }
+            printer.unindent(); printer.printLn("}");
+
+
             printer.unindent(); printer.printLn("};");
         }
 
-        printer.printLn();
-        printer.printLn("struct Monitor");
-        printer.printLn("{");
-        printer.indent();
-        printer.printLn("ros::NodeHandle n;");
-
-        printer.printLn();
-        for (String topic : getTopics()) {
-            printer.printLn("rv::monitor::MonitorTopic<" + getMessageTypeForTopic(topic) + "> " + getCNameForTopic(topic) + ";");
-        }
-
-        printer.printLn();
-        for (CSpecification cspec : toWrite.keySet()) {
-            printer.printLn("rosmop_generated::" + cspec.getSpecName() + " " + cspec.getSpecName() + ";");
-        }
-
-        printer.printLn();
-        printer.printLn("Monitor()");
-        int i = 0;
-        for (String topic : getTopics()) {
-            if(i == 0)
-                printer.printLn("    : " + getCNameForTopic(topic) + "(n, \"" + topic + "\", 1000)");
-            else
-                printer.printLn("    , " + getCNameForTopic(topic) + "(n, \"" + topic + "\", 1000)");
-            i += 1;
-        }
-        printer.printLn("{"); printer.indent();
-        for (CSpecification cspec : toWrite.keySet()) {
-            for (Event event : getEventsForCSpecification(cspec)) {
-                String topic = getTopicForEvent(event);
-
-                printer.printLn(getCNameForTopic(topic) + ".registerEvent(" +
-                       "&" + cspec.getSpecName() +
-                   ", &" + "rosmop_generated::" + cspec.getSpecName() + "::" + callbackNameForEvent(event) + ");");
-            }
-        }
-        printer.unindent(); printer.printLn("}");
         printer.unindent(); printer.printLn("};");
-        printer.unindent(); printer.printLn("}");
 
         printer.printLn();
-        printer.printLn("int main(int argc, char ** argv)\n"
-                      + "{\n"
-                      + "    ros::init(argc, argv, \"rvmonitor\");\n"
-                      + "    rosmop_generated::Monitor m;\n"
-                      + "    ros::spin();\n"
-                      + "    return 0;\n"
-                      + "}");
+        printer.printLn("int main(int argc, char ** argv) {");
+        printer.indent();
+        printer.printLn("rv::monitor::Monitor monitor(argc, argv, \"rvmonitor\");");
+        for (CSpecification cspec : toWrite.keySet()) {
+            printer.printLn("rosmop_generated::" + cspec.getSpecName() + " " + cspec.getSpecName() + "(monitor);");
+        }
+        printer.printLn("return monitor.run();");
+        printer.unindent(); printer.printLn("};");
 
         Tool.writeFile(printer.getSource(), outputPath);
     }

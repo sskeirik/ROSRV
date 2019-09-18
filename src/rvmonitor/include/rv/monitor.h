@@ -5,6 +5,7 @@
 #include <functional>
 #include <ros/ros.h> // TODO: Use more specific headers
 #include <rv/subscription_shim.h>
+#include <rv/pub_update_shim.h>
 
 namespace rv {
 namespace monitor {
@@ -67,6 +68,15 @@ private:
 };
 
 struct Monitor {
+
+    Monitor(int argc, char** argv, std::string const& node_name)
+        : pub_update_shim(*this)
+    {
+      ros::init(argc, argv, "rvmonitor");
+      enable_rvmaster_shims();
+    }
+
+    /* Create a MonitorTopic, make sure that it is of the right message type */
     template<class MessageType>
     typename MonitorTopic<MessageType>::Ptr withTopic(std::string const& topic) {
         typename MonitorTopic<MessageType>::Ptr ret = nullptr;
@@ -80,14 +90,25 @@ struct Monitor {
         }
     }
 
-    bool isMonitoring() {
-
+    /* Register a handler for an topic */
+    template<class MessageType, class T>
+    void registerEvent(std::string const& topic, T* owner, void (T::*callback)(MessageType&)) {
+        withTopic<MessageType>(topic)->registerEvent(owner, callback);
     }
 
-    void enable_rvmaster_shims() {
-    };
-    ros::NodeHandle node_handle;
+    void enable_rvmaster_shims();
 
+    bool isMonitored(std::string const& topic) {
+        return monitored_topics.find(topic) != monitored_topics.end();
+    }
+
+    int run() {
+        ros::spin();
+        return 0;
+    }
+
+    ros::NodeHandle node_handle;
+    PubUpdateShim pub_update_shim;
     std::map<std::string, MonitorTopicErasedPtr> monitored_topics;
 };
 

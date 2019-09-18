@@ -7,14 +7,17 @@
 namespace rv {
 namespace monitor {
 
-struct PubUpdateShim {
-  PubUpdateShim();
+struct Monitor;
 
-  bool pubUpdate(std::string topic, const std::vector<std::string> &pubs);
+struct PubUpdateShim {
+  PubUpdateShim(Monitor&);
+
+  bool pubUpdate(std::string topic, std::vector<std::string> const&);
   void pubUpdateCallback(XmlRpc::XmlRpcValue& params, XmlRpc::XmlRpcValue& result);
 
 private:
   ros::TopicManagerPtr topic_manager;
+  Monitor& monitor;
 };
 
 }
