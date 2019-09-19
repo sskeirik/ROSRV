@@ -66,9 +66,9 @@ public class CppGenerator {
 
             if (parameter.getType().endsWith("[]")) {
                 printer.print("vector<" + parameter.getType().replace("[]", "")
-                        + ">" + "& " + parameter.getDeclaredName() + " = ");
+                        + ">" + " " + parameter.getDeclaredName() + " = ");
             } else {
-                printer.print(parameter.getType() + "& " + parameter.getDeclaredName() + " = ");
+                printer.print(parameter.getType() + " " + parameter.getDeclaredName() + " = ");
             }
             printer.print("message" + "." + event.getPattern().get(parameter.getDeclaredName()) + ";");
             printer.printLn();
