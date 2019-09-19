@@ -10,15 +10,15 @@ RobixImprovedControlSpec() {
     RobixImprovedControlSpec()
 	: monitorState(std::vector<std::string> { "k", "v", "xg", "yg" }) { }
 
-    event update_velocity(float v, int32_t t) /aa_quant_monitor__speed marti_common_msgs/Float32Stamped '{value:v, header:{stamp:{sec:t}} }' {
+    event update_velocity(float v, int32_t t) /aa_quant_monitor/speed marti_common_msgs/Float32Stamped '{value:v, header:{stamp:{sec:t}} }' {
 	monitorState.updateV(static_cast<long double>(v), static_cast<long double>(t));
     }
 
-    event update_curvature(float k) /aa_quant_monitor__curvature marti_common_msgs/Float32Stamped '{value:k}' {
+    event update_curvature(float k) /aa_quant_monitor/curvature marti_common_msgs/Float32Stamped '{value:k}' {
 	monitorState.updateK(static_cast<long double>(k));
     }
 
-    event update_planned_line(float xg, float yg) /monitoring__planned_line nav_msgs/Path
+    event update_planned_line(float xg, float yg) /monitoring/planned_line nav_msgs/Path
     '{poses[1]:{pose:{position:{x:xg}}}, poses[1]:{pose:{position:{y:yg}}}}'
     {
 	monitorState.updateXgYg(static_cast<long double>(xg), static_cast<long double>(yg));
