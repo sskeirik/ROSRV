@@ -1,0 +1,7 @@
+<launch>
+
+    <node name="rvmonitor" pkg="rvmonitor" type="monitor-robix-control"
+    output="screen" />
+    <node name= "test" pkg="robix-test" type="robix-test.py" />
+
+</launch>

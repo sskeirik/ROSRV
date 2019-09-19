@@ -8,7 +8,7 @@ import std_msgs.msg
 def talker():
     pub = rospy.Publisher('/rv/monitored/aa_quant_monitor_speed',
             Float32Stamped, queue_size=10)
-    rospy.init_node('talker', anonymous=False)
+    rospy.init_node('test', anonymous=False)
 
     rate = rospy.Rate(1) # 10hz
     while not rospy.is_shutdown():
