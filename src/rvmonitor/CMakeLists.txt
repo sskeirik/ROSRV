@@ -113,12 +113,14 @@ function(build_monitor spec_file monitor_name)
   )
   add_executable(${monitor_name} ${output_prefix}.cpp)
   target_include_directories(${monitor_name} PRIVATE ${PROJECT_BINARY_DIR}/monitors/)
+  target_include_directories(${monitor_name} PRIVATE ${PROJECT_SOURCE_DIR}/specs/cpp)
   target_link_libraries(${monitor_name} librvmonitor)
 endfunction()
 
-build_monitor(${PROJECT_SOURCE_DIR}/specs/single-parameter.rv monitor-single-parameter)
-build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-parameters.rv monitor-multiple-parameters)
-build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-channels.rv monitor-multiple-channels)
+# build_monitor(${PROJECT_SOURCE_DIR}/specs/single-parameter.rv monitor-single-parameter)
+# build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-parameters.rv monitor-multiple-parameters)
+# build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-channels.rv monitor-multiple-channels)
+build_monitor(${PROJECT_SOURCE_DIR}/specs/robix-control.rv monitor-robix-control)
 
 ## Add gtest based cpp test target and link libraries
 # catkin_add_gtest(${PROJECT_NAME}-test test/test_rvmonitor.cpp)

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+    <name>robix-test</name>
+  <version>0.0.0</version>
+  <description>Test for Monitor</description>
+
+  <maintainer email="todo@todo.com">todo</maintainer>
+
+  <license>todo</license>
+
+
+  <author>Todo</author>
+
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <build_depend>marti_common_msgs</build_depend>
+  <run_depend>rospy</run_depend>
+</package>

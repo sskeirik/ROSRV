@@ -1,0 +1,17 @@
+#include <cstring>
+#include <string>
+#include "ros/ros.h"
+#include <provided/robix-control-provided.h>
+
+RobixImprovedControlSpec() {
+
+    provided::MonitorState monitorState;
+
+
+    event update_velocity(float v, float t) /aa_quant_monitor_speed marti_common_msgs/Float32Stamped '{value:v, header:{stamp:{sec:t}} }'
+    {
+	monitorState.updateV(static_cast<long double>(v), static_cast<long double>(t));
+    }
+
+
+}
