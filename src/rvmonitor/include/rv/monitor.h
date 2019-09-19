@@ -39,7 +39,7 @@ struct MonitorTopic
     void callback(boost::shared_ptr<const MessageType> ptr) {
         MessageType copy = *ptr;
         for (auto event_cb: m_events) { event_cb(copy); }
-        publisher.publish(copy);
+        //publisher.publish(copy);
     }
 
 private:
