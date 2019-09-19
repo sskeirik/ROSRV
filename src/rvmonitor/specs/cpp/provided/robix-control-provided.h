@@ -66,17 +66,18 @@ struct MonitorState {
 
     void checkViolation() {
 	bool status = true;
+	for(const auto &pair : statusMap) {
+	    status = status && pair.second;
+	}
 	if(!initialized) {
-	    for(const auto &pair : statusMap) {
-		status = status && pair.second;
+	    if(status) {
+		initialized = true;
 	    }
-	    initialized = true;
 	} else {
 
 	    for(const auto &pair : statusMap) {
 		status = status && pair.second;
 	    }
-
 	    if(status) {
 		// offset the time between states
 		currState.t = currState.t - prevState.t;
@@ -100,7 +101,7 @@ struct MonitorState {
 	} else {
 	    currState.v = v;
 	    currState.t = (t * 10.0);
-	    currState.a = (currState.v - prevState.v) / (currState.t) - (prevState.t);
+	    currState.a = (currState.v - prevState.v) / (currState.t - prevState.t);
 	}
 	checkViolation();
     }
