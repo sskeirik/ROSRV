@@ -52,6 +52,7 @@ public class CppGenerator {
     public static String getCNameForTopic(String topic) {
         if (topic.charAt(0) == '/')
         topic = topic.substring(1);
+	topic = topic.replaceAll("/", "__");
         return topic;
     }
 
