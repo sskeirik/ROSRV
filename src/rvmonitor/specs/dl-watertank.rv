@@ -1,0 +1,38 @@
+testDlWatertankSpec() {
+
+    event current_level(float l) std_msgs/Float32 /level_sensor '{data:level}'
+    {
+	update_l(l);
+    }
+
+    event flow_controller_input(float f, int32_t t) /flow_control_cmd marti_common_msgs/Float32Stamped '{value:f, header:{stamp:{sec:t}}}'
+    {
+	update_f_t(f, c);
+	check();
+    }
+
+    dL :
+	Functions.
+	  R m.
+	  R ep.
+	End.
+
+	ProgramVariables.
+	  R f.
+	  R l.
+	  R c.
+	End.
+
+	Problem.
+	     (0 <= l & l <= m & 0 < ep)
+	  -> [
+	      { f :=*;
+		?-1 <= f & f <= (m-l)/ep;
+		c := 0;
+		{ l' = f, c' = 1 & 0 <= l & c <= ep }
+	      }*
+	     ](0 <= l & l <= m)
+	End.
+
+    @violation {}
+}
