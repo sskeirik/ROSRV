@@ -5,10 +5,10 @@ testDlWatertankSpec() {
 	update_l(l);
     }
 
-    event flow_controller_input(float f, int32_t t) /flow_control_cmd marti_common_msgs/Float32Stamped '{value:f, header:{stamp:{sec:t}}}'
+    event flow_controller_input(float f, int32_t c) /flow_control_cmd marti_common_msgs/Float32Stamped '{value:f, header:{stamp:{sec:c}}}'
     {
 	update_f_t(f, c);
-	check();
+	checkViolation();
     }
 
     dL :

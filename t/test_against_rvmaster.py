@@ -6,6 +6,8 @@ from std_msgs.msg import String
 
 import pytest
 
+pytestmark = pytest.mark.skip("Unimplemented WIP")
+
 @pytest.fixture(scope="session")
 def ros_init():
     ros.init_node('test')
@@ -25,13 +27,13 @@ def ros_subscribe(ros_init):
     return subscribe
 
 def test_unmonitored_channel(ros_subscribe):
-    [ros_init, rate, recieved_messages] = ros_subscribe('unmonitored') 
+    [ros_init, rate, recieved_messages] = ros_subscribe('unmonitored')
     check_call(['rostopic', 'pub', '--once', '/unmonitored', 'std_msgs/String', 'Hi!'])
     rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()
     assert(recieved_messages == ['Hi!'])
 
 def test_monitored_channel(ros_subscribe):
-    [ros_init, rate, recieved_messages] = ros_subscribe('chatter') 
+    [ros_init, rate, recieved_messages] = ros_subscribe('chatter')
     check_call(['rostopic', 'pub', '--once', '/chatter', 'std_msgs/String', 'Hi!'])
     rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()
     assert(recieved_messages == ['Hi!RV'])

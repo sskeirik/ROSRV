@@ -63,7 +63,7 @@ test_without_rvmaster() {
     sleep 1
 
     progress "Running tests"
-    pytest t/test-without-rvmaster.py
+    pytest t/
 
     cleanup
 }
