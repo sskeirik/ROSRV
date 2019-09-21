@@ -1,24 +1,38 @@
+#include <rv/dl.h>
+
 testDlWatertankSpec() {
 
-    void pre_check() {
-	curr.l = 0;
+    void pre_check_actions() {
+	monitorState.currState.c = 0;
+    }
+    void post_check_actions(bool verdict) {
+	if(!verdict)
+	    monitorState.currState.f = 0.0;
     }
 
-    void post_check() {
+    void fallback(marti_common_msgs::Float32Stamped& message)
+    {
+	monitorState.currState.f = 0.0;
+	message.value = 0.0;
     }
 
 
-    event current_level(float l) std_msgs/Float32 /level_sensor '{data:l}'
+    event current_level(float l) /level_sensor std_msgs/Float32  '{data:l}'
     {
 	update_l(l);
     }
 
-    event flow_controller_input(float f, Ros::Time c) /flow_control_cmd marti_common_msgs/Float32Stamped '{value:f, header:{stamp:{sec:c}}}'
+    event flow_controller_input(float f, ros::Time cTime) /flow_control_cmd marti_common_msgs/Float32Stamped '{value:f, header:{stamp:cTime}}'
     {
 	update_f(f);
-	update_c(c);
-	check_violation( &rosmop_generated::testDlWatertankSpec &pre_check
-		       , &rosmop_generated::testDlWatertankSpec &post_check);
+	update_c(cTime.toSec());
+
+	if(!monitorState.check_violation<rosmop_generated::testDlWatertankSpec>
+		( this,
+		  &rosmop_generated::testDlWatertankSpec::pre_check_actions
+		, &rosmop_generated::testDlWatertankSpec::post_check_actions) ) {
+	    fallback(message);
+	}
     }
 
     dL :

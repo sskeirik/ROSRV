@@ -119,7 +119,21 @@ endfunction()
 build_monitor(${PROJECT_SOURCE_DIR}/specs/single-parameter.rv monitor-single-parameter)
 build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-parameters.rv monitor-multiple-parameters)
 build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-channels.rv monitor-multiple-channels)
-build_monitor(${PROJECT_SOURCE_DIR}/specs/dl-watertank.rv monitor-dl-watertank)
+# build_monitor(${PROJECT_SOURCE_DIR}/specs/dl-watertank.rv monitor-dl-watertank)
+
+## ------------------ TEMP (for dev) ---------------
+add_custom_command(
+  OUTPUT ${PROJECT_BINARY_DIR}/monitors/monitor-dl-watertank.cpp ${PROJECT_BINARY_DIR}/monitors/monitor-dl-watertank.h
+  COMMAND mkdir -p ${PROJECT_BINARY_DIR}/monitors/ &&
+	  cp ${PROJECT_SOURCE_DIR}/specs/monitor-dl-watertank.cpp ${PROJECT_BINARY_DIR}/monitors &&
+	  cp ${PROJECT_SOURCE_DIR}/specs/monitor-dl-watertank.h ${PROJECT_BINARY_DIR}/monitors/monitor-dl-watertank.h
+  DEPENDS ${PROJECT_SOURCE_DIR}/specs/monitor-dl-watertank.cpp ${PROJECT_SOURCE_DIR}/specs/monitor-dl-watertank.h
+)
+add_executable(monitor-dl-watertank ${PROJECT_BINARY_DIR}/monitors/monitor-dl-watertank.cpp)
+target_include_directories(monitor-dl-watertank PRIVATE ${PROJECT_BINARY_DIR}/monitors/)
+target_link_libraries(monitor-dl-watertank librvmonitor)
+
+## -------------------------------------------------
 
 ## Add gtest based cpp test target and link libraries
 # catkin_add_gtest(${PROJECT_NAME}-test test/test_rvmonitor.cpp)
