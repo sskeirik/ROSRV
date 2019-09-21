@@ -119,6 +119,7 @@ endfunction()
 build_monitor(${PROJECT_SOURCE_DIR}/specs/single-parameter.rv monitor-single-parameter)
 build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-parameters.rv monitor-multiple-parameters)
 build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-channels.rv monitor-multiple-channels)
+build_monitor(${PROJECT_SOURCE_DIR}/specs/dl-watertank.rv monitor-dl-watertank)
 
 ## Add gtest based cpp test target and link libraries
 # catkin_add_gtest(${PROJECT_NAME}-test test/test_rvmonitor.cpp)

@@ -1,14 +1,24 @@
 testDlWatertankSpec() {
 
-    event current_level(float l) std_msgs/Float32 /level_sensor '{data:level}'
+    void pre_check() {
+	curr.l = 0;
+    }
+
+    void post_check() {
+    }
+
+
+    event current_level(float l) std_msgs/Float32 /level_sensor '{data:l}'
     {
 	update_l(l);
     }
 
-    event flow_controller_input(float f, int32_t c) /flow_control_cmd marti_common_msgs/Float32Stamped '{value:f, header:{stamp:{sec:c}}}'
+    event flow_controller_input(float f, Ros::Time c) /flow_control_cmd marti_common_msgs/Float32Stamped '{value:f, header:{stamp:{sec:c}}}'
     {
-	update_f_t(f, c);
-	checkViolation();
+	update_f(f);
+	update_c(c);
+	check_violation( &rosmop_generated::testDlWatertankSpec &pre_check
+		       , &rosmop_generated::testDlWatertankSpec &post_check);
     }
 
     dL :
