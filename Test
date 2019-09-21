@@ -59,9 +59,6 @@ test_without_rvmaster() {
     roscore -p 20022 >/dev/null  &
     sleep 1
 
-    progress "Running monitor"
-    rosrun rvmonitor test-isolated-monitor & sleep 1
-
     progress "Running tests"
     pytest t/
 
