@@ -27,22 +27,19 @@ def ros_subscribe(ros_init):
     return subscribe
 
 def test_unmonitored_channel(ros_subscribe):
-    print("1", file=sys.stderr)
     [ros_init, rate, recieved_messages] = ros_subscribe('unmonitored') 
-    print("2", file=sys.stderr)
     check_call(['rostopic', 'pub', '--once', '/unmonitored', 'std_msgs/String', 'Hi!'])
-    print("3", file=sys.stderr)
     rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()
-    print("4", file=sys.stderr)
     assert(recieved_messages == ['Hi!'])
 
 def test_monitored_channel(ros_subscribe):
     print("a", file=sys.stderr)
-    [ros_init, rate, recieved_messages] = ros_subscribe('chatter') 
+    [ros_init, rate, recieved_messages] = ros_subscribe('/chatter') 
     print("b", file=sys.stderr)
     check_call(['rostopic', 'pub', '--once', '/chatter', 'std_msgs/String', 'Hi!'])
     print("c", file=sys.stderr)
     rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()
+    rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()
     print("d", file=sys.stderr)
-    assert(recieved_messages == ['Hi!RV'])
+    assert(recieved_messages == ['Hi!RV1'])
 

@@ -6,6 +6,8 @@
 #include <ros/ros.h> // TODO: Use more specific headers
 #include <rv/subscription_shim.h>
 #include <rv/pub_update_shim.h>
+#include <boost/optional.hpp>
+#include <ros/console.h>
 
 namespace rv {
 namespace monitor {
@@ -13,7 +15,15 @@ namespace monitor {
 std::string getMonitorSubscribedTopicForTopic(const std::string& topic);
 std::string getMonitorAdvertisedTopicForTopic(const std::string& topic);
 
-struct MonitorTopicErased {
+struct ROSInit {
+    ROSInit(int& argc, char** argv, std::string const& node_name)
+    {
+        ros::init(argc, argv, node_name);  
+    }
+};
+
+struct MonitorTopicErased
+{
     ros::Publisher  publisher;
     ros::Subscriber subscriber;
     rv::SubscriptionShim subscription_shim;
@@ -53,8 +63,8 @@ struct MonitorTopic
                       , void (T::*callback)(MessageType&)
                       )
     {
-        m_events.push_back([owner, callback](MessageType& msg) -> void
-                               { (owner->*callback)(msg); });
+        auto cb = [owner, callback](MessageType& msg) -> void { (owner->*callback)(msg); };
+        m_events.push_back(cb);
     }
 
     void callback(boost::shared_ptr<const MessageType> ptr) {
@@ -68,12 +78,18 @@ private:
 };
 
 struct Monitor {
-
     Monitor(int argc, char** argv, std::string const& node_name)
-        : pub_update_shim(*this)
+        : ros_init(argc, argv, "rvmonitor")
     {
-      ros::init(argc, argv, "rvmonitor");
-      enable_rvmaster_shims();
+        std::cerr << "Monitor constructed " << "\n";
+        std::cerr << "argv: " << argv[0] << '\n';
+
+
+        if (argc >= 2 && std::string(argv[1]) == "--with-rvmaster")
+            enable_rvmaster_shims();
+        if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
+               ros::console::notifyLoggerLevelsChanged();
+        }
     }
 
     /* Create a MonitorTopic, make sure that it is of the right message type */
@@ -88,15 +104,21 @@ struct Monitor {
         else {
             ret = boost::dynamic_pointer_cast<MonitorTopic<MessageType>>(monitored_topics.at(topic));
         }
+        return ret;
     }
 
     /* Register a handler for an topic */
     template<class MessageType, class T>
     void registerEvent(std::string const& topic, T* owner, void (T::*callback)(MessageType&)) {
-        withTopic<MessageType>(topic)->registerEvent(owner, callback);
+        auto monitor_topic = withTopic<MessageType>(topic); 
+        monitor_topic->registerEvent(owner, callback);
     }
 
-    void enable_rvmaster_shims();
+    void enable_rvmaster_shims()
+    {
+        std::cerr << "Shim enabled\n";
+        pub_update_shim.emplace(*this); // Construct a new PubUpdateShim
+    };
 
     bool isMonitored(std::string const& topic) {
         return monitored_topics.find(topic) != monitored_topics.end();
@@ -107,8 +129,9 @@ struct Monitor {
         return 0;
     }
 
+    ROSInit ros_init;
     ros::NodeHandle node_handle;
-    PubUpdateShim pub_update_shim;
+    boost::optional<PubUpdateShim> pub_update_shim;
     std::map<std::string, MonitorTopicErasedPtr> monitored_topics;
 };
 

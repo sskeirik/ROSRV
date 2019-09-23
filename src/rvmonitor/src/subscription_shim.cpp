@@ -28,9 +28,9 @@ using namespace rv;
 using namespace XmlRpc;
 
 SubscriptionShim::SubscriptionShim(std::string const& connectTopic, std::string const& handlerTopic)
-  : topic_manager(ros::TopicManager::instance())
-  , connectTopic(connectTopic)
+  : connectTopic(connectTopic)
   , handlerTopic(handlerTopic)
+  , topic_manager(ros::TopicManager::instance())
 {
 }
 
@@ -239,4 +239,5 @@ bool SubscriptionShim::connectToPublishers()
       connect((*it)->getRemoteURI());
     }
   }
+  return true;
 }

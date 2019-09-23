@@ -10,9 +10,3 @@ string monitor::getMonitorSubscribedTopicForTopic(const std::string& topic) {
 string monitor::getMonitorAdvertisedTopicForTopic(const std::string& topic) {
     return topic;
 }
-
-
-void monitor::Monitor::enable_rvmaster_shims()
-{
-
-}
