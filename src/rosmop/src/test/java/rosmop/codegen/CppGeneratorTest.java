@@ -29,7 +29,6 @@ public class CppGeneratorTest {
         resourceUtils = new ResourceUtils();
     }
 
-
    private void testOutputFiles(File specFile, boolean monitorAsNode) {
        String generatedCpp, expectedCpp;
        try {
@@ -88,16 +87,16 @@ public class CppGeneratorTest {
        CppGenerator.printer = new SourcePrinter();
    }
 
-    @Test
+    @Test @Ignore
     public void simpleSpecIsolatedNode() {
       simpleTestRunWithParams("simple-spec.rv", true);
     }
 
-    @Test
+    @Test @Ignore
     public void simpleSpecCppRVMaster() {
        simpleTestRunWithParams("simple-spec.rv", false);
     }
 
-    @Test @Ignore("Ignoring Dl Generation Test (WIP)")
+    @Test @Ignore
     public void simpleDlSpecIsolatedNode() { simpleTestRunWithParams("simple-dl-spec.rv", true);}
 }

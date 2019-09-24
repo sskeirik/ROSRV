@@ -24,7 +24,7 @@ source /opt/ros/kinetic/setup.bash # TODO: This path is Ubuntu specific
 export PATH="$(pwd)/src/rosmop/bin:$PATH"
 
 progress "Building rosmop"
-(cd src/rosmop ; mvn -q package -DskipTests)
+(cd src/rosmop ; mvn -q package)
 
 progress "Building src"
 catkin build --cmake-args -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON --
