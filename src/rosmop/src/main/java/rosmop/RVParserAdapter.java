@@ -123,6 +123,11 @@ public class RVParserAdapter implements CSpecification {
 	 * @return The initialization block
 	 */
 	public String getInit() {
-		return wrapped.getInit();
+		// Todo: Use Maybe/Optional
+	    for(CFunction function : wrapped.getCFunctions()) {
+	    	if(function.getName().equals("init"))
+	    		return function.getContent();
+		}
+	    return "";
 	}
 }

@@ -1,0 +1,12 @@
+#include <stdlib.h>
+#include "ros/ros.h"
+
+TestMonitor() {
+       string const testStr = "aString";
+       string const testStr2 = "bString";
+
+       event testEvent(double testPar) /chatter std_msgs/Float64 '{data:testPar}'
+       {
+           ROS_INFO("Test Parameter Binding is %g", testPar);
+       }
+}
