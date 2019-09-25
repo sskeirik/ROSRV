@@ -101,7 +101,8 @@ public class CppGenerator {
             printer.printLn("struct " + cspec.getSpecName());
             printer.printLn("{"); printer.indent();
 
-            printer.printLn(cspec.getDeclarations());
+            List<String> declarations = Arrays.asList(cspec.getDeclarations().split("\n"));
+            declarations.forEach(line -> printer.printLn(line));
 
             // Print Functions in Specification
             // TODO: Get rid of if
