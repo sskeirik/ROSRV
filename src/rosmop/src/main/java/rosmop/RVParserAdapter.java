@@ -130,4 +130,8 @@ public class RVParserAdapter implements CSpecification {
 		}
 	    return "";
 	}
+
+	public MonitorFile getMonitorFile() {
+		return this.file;
+	}
 }

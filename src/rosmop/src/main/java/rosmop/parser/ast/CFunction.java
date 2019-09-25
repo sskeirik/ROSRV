@@ -30,4 +30,19 @@ public class CFunction {
     public String getContent() {
         return content;
     }
+
+    @Override
+    public String toString() {
+       StringBuffer buffer = new StringBuffer();
+       buffer.append(returnType + " " + name + "(");
+       if(!params.isEmpty()) {
+           buffer.append(params.get(0));
+           for (Parameter param : this.params.subList(1, params.size())) {
+               buffer.append(" ," + param);
+           }
+       }
+       buffer.append(") \n");
+       buffer.append(content);
+       return buffer.toString();
+    }
 }
