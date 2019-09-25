@@ -131,7 +131,11 @@ public class RVParserAdapter implements CSpecification {
 	    return "";
 	}
 
-	public MonitorFile getMonitorFile() {
-		return this.file;
+	public String getCFunctions() {
+		StringBuilder buffer = new StringBuilder();
+		for(CFunction function : wrapped.getCFunctions()) {
+			buffer.append(function.toString() + "\n");
+		}
+		return buffer.toString();
 	}
 }

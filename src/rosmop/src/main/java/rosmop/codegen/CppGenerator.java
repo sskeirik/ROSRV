@@ -104,9 +104,11 @@ public class CppGenerator {
             printer.printLn(cspec.getDeclarations());
 
             // Print Functions in Specification
-            if(cspec instanceof Specification) {
-                List<CFunction> cFunctions = ((Specification) cspec).getCFunctions();
-                cFunctions.forEach(f -> printer.printLn(f.toString()));
+            // TODO: Get rid of if
+            if(cspec instanceof RVParserAdapter) {
+                String cFunctions = ((RVParserAdapter) cspec).getCFunctions();
+                Arrays.asList(cFunctions.split("\n")).forEach(f -> printer.printLn(f));
+                printer.printLn("");
             }
 
             // DL Specific Code
