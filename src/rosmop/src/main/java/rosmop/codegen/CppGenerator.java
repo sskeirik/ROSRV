@@ -8,7 +8,9 @@ import org.apache.commons.io.FilenameUtils;
 
 import rosmop.ROSMOPException;
 import rosmop.RVParserAdapter;
+import rosmop.parser.ast.CFunction;
 import rosmop.parser.ast.ROSEvent;
+import rosmop.parser.ast.Specification;
 import rosmop.parser.ast.Variable;
 import rosmop.util.MessageParser;
 import rosmop.util.Tool;
@@ -94,19 +96,35 @@ public class CppGenerator {
         printer.printLn("{"); printer.indent();
 
         for (CSpecification cspec : toWrite.keySet()) {
+            LogicPluginShellResult shellResult = toWrite.get(cspec);
+            boolean isRawSpec = (shellResult == null);
             printer.printLn("struct " + cspec.getSpecName());
             printer.printLn("{"); printer.indent();
 
             printer.printLn(cspec.getDeclarations());
-            printer.printLn();
 
-            /*
-            // TODO: What are these?
+            // Print Functions in Specification
+            if(cspec instanceof Specification) {
+                List<CFunction> cFunctions = ((Specification) cspec).getCFunctions();
+                cFunctions.forEach(f -> printer.printLn(f.toString()));
+            }
+
+            // DL Specific Code
+            // Todo: Make this generic by passing ToolName via rv-monitor
+            if(!isRawSpec && cspec.getFormalism().equalsIgnoreCase("DL")) {
+                printer.printLn("rv::dl::MonitorState< modelplex_generated::state" + "\n" +
+                        "                                 , modelplex_generated::parameters> monitorState;");
+                String updateFunctions = (String) shellResult.properties.getOrDefault("state update functions", "");
+                Arrays.asList(updateFunctions.split("\n")).forEach(line -> printer.printLn(line));
+                printer.printLn();
+            }
+
+
+            /* TODO: Possibly redundant code?
             if (toWrite.get(cspec) != null) {
                 printer.printLn((String) toWrite.get(cspec).properties.get("state declaration"));
                 printer.printLn((String) toWrite.get(cspec).properties.get("categories"));
                 printer.printLn((String) toWrite.get(cspec).properties.get("monitoring body"));
-                printer.printLn();
             }
             */
 

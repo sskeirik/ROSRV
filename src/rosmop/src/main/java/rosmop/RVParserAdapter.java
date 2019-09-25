@@ -125,4 +125,8 @@ public class RVParserAdapter implements CSpecification {
 	public String getInit() {
 		return wrapped.getInit();
 	}
+
+	public MonitorFile getMonitorFile() {
+		return this.file;
+	}
 }
