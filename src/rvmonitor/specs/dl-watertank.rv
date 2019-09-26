@@ -16,19 +16,24 @@ testDlWatertankSpec() {
 	message.value = 0.0;
     }
 
+    void initializeParams()
+    {
+	monitorState.params.m = 1.0;
+	monitorState.params.ep = 5.0;
+    }
+
 
     event current_level(float l) /level_sensor std_msgs/Float32  '{data:l}'
     {
-	update_l(l);
+	update_l(static_cast<long double>(l));
     }
 
     event flow_controller_input(float f, ros::Time cTime) /flow_control_cmd marti_common_msgs/Float32Stamped '{value:f, header:{stamp:cTime}}'
     {
-	update_f(f);
-	update_c(cTime.toSec());
+	update_f(static_cast<long double>(f));
+	update_c(static_cast<long double>(cTime.toSec()));
 
-	if(!monitorState.check_violation<rosmop_generated::testDlWatertankSpec>
-		( this,
+	if(!monitorState.check_violation<rosmop_generated::testDlWatertankSpec> ( this,
 		  &rosmop_generated::testDlWatertankSpec::pre_check_actions
 		, &rosmop_generated::testDlWatertankSpec::post_check_actions) ) {
 	    fallback(message);
