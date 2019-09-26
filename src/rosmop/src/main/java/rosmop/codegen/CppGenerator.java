@@ -114,13 +114,10 @@ public class CppGenerator {
             if(!isRawSpec && cspec.getFormalism().equalsIgnoreCase("DL")) {
                 printer.printLn("rv::dl::MonitorState< modelplex_generated::state" + "\n" +
                         "                                 , modelplex_generated::parameters> monitorState;");
-                printer.printLn("");
-                String constructor = (String) shellResult.properties.getOrDefault("state constructor", "");
-                Arrays.asList(constructor.split("\n")).forEach(line -> printer.printLn(line));
-                printer.printLn("");
-                String updateFunctions = (String) shellResult.properties.getOrDefault("state update functions", "");
-                Arrays.asList(updateFunctions.split("\n")).forEach(line -> printer.printLn(line));
-                printer.printLn();
+
+                // DL Plugin generated code
+                String generatedFunctions = (String) shellResult.properties.getOrDefault("generated functions", "");
+                Arrays.asList(generatedFunctions.split("\n")).forEach(line -> printer.printLn(line));
             }
 
 
