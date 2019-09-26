@@ -1,5 +1,6 @@
 package rosmop.parser.ast;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class CFunction {
@@ -42,7 +43,15 @@ public class CFunction {
            }
        }
        buffer.append(") \n");
-       buffer.append(content);
+
+       String[] stringArray = content.split("\n");
+       for(int i = 0; i < stringArray.length; ++i) {
+           if(i == stringArray.length - 1) {
+              buffer.append(stringArray[i].trim() + "\n");
+           } else {
+               buffer.append(stringArray[i] + "\n");
+           }
+       }
        return buffer.toString();
     }
 }
