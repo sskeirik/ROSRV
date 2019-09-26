@@ -1,6 +1,10 @@
 #ifndef RV_DL_H
 #define RV_DL_H
 
+#include<vector>
+#include<string>
+#include<map>
+
 
 namespace rv
 {
