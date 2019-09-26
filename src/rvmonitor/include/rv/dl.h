@@ -27,8 +27,7 @@ struct MonitorState
     bool isInitializedFlag;
 
 
-    void initialize(P params, std::vector<std::string> variables) {
-	this->params = params;
+    void initialize(std::vector<std::string> variables) {
 	this->logicalVariables = variables;
 
 	bool prevStateExistsFlag;
@@ -66,23 +65,6 @@ struct MonitorState
 		isInitializedFlag = true;
 	    return status;
 	    }
-	}
-	return true;
-    }
-
-    template <class T>
-    bool check_violation( T* owner
-		        , void (T::*pre_check)()
-			, void (T::*post_check)(bool)
-			) {
-	if(isInitialized()) {
-	    (owner->*pre_check)();
-	    bool verdict = modelplex_generated::monitorSatisfied( prevState
-								, currState
-								, &params );
-	    prevState = currState;
-	    (owner->*post_check)(verdict);
-	    return verdict;
 	}
 	return true;
     }
