@@ -39,7 +39,7 @@ public class ROSMOPParser {
 			throw new RuntimeException(e);
 		}
     }
-    
+
     /**
      * Parse a complete RVM file specification.
      * @param reader The place to read the specification from.
@@ -47,10 +47,10 @@ public class ROSMOPParser {
      */
     public static MonitorFile parse(final Reader reader) {
         if (parser == null)
-			parser = new ROSMOPParser(reader); 
+			parser = new ROSMOPParser(reader);
 		else
 			parser.ReInit(reader);
-			
+
         try {
             return parser.rvFile();
         } catch(ParseException e) {
@@ -59,7 +59,7 @@ public class ROSMOPParser {
             throw new RuntimeException(e);
         }
     }
-    
+
     /**
      * Read a backtick segment with matched backticks, e.g. `a`, ``a``, ```a```, or ``a`b``.
      * Assumes the first backtick has already been read.
@@ -98,9 +98,9 @@ public class ROSMOPParser {
             return "";
         }
     }
-    
+
     /**
-     * Reads a segment from the character stream with matching open and close characters, 
+     * Reads a segment from the character stream with matching open and close characters,
      * e.g. (((--)--(--))--).
      * @param open The opening character.
      * @param close The closing character.
@@ -129,7 +129,7 @@ public class ROSMOPParser {
             return "";
         }
     }
-    
+
     /**
      * Parse matching parentheses from the character stream, assuming one is already read.
      * @return The string read, including the first and last parentheses.
@@ -137,7 +137,7 @@ public class ROSMOPParser {
     private String parseMatchingParens() throws ParseException {
         return parseMatchingSegment('(', ')', 1);
     }
-    
+
     /**
      * Parse matching curly brackets from the character stream, assuming one is already read.
      * @return The string read, including the first and last curly brackets.
@@ -145,7 +145,7 @@ public class ROSMOPParser {
     private String parseMatchingCurlyBrackets() throws ParseException {
         return parseMatchingSegment('{', '}', 1);
     }
-    
+
     /**
      * Read characters from the character stream until a string is exactly matched. Pushes the
      * matched text back onto the character stream.
@@ -182,7 +182,7 @@ public class ROSMOPParser {
             return "";
         }
     }
-    
+
     /**
      * Read lines from the character stream until a regular expression matches the line. Pushes
      * the matching line back into the character stream.
@@ -227,23 +227,16 @@ TOKEN : {
     | <AT : "@">
     | <EVENT : ("event")>
     | < INIT: "init" >
-    | <KEYWORD : ("const" | "static" | "public" | "private")>
-    | <ID : (<LETTER>|"_")(<LETTER>|<DIGIT>|"_"|"."|"-"|"*"|"::"|"&")*>
-    | <DIGITS : (["0"-"9"])+>
+    | <ID : (<LETTER>|"_")(<LETTER>|<DIGIT>|"_"|"."|"-")*>
     | <DIGIT : ["0"-"9"]>
     | <LETTER : ["a"-"z","A"-"Z"]>
     | <BACKTICK : "`">
     | <COMMA : ",">
-    | <SEMICOLON : ";">
-    | <EQUAL : "=">
 }
 
 TOKEN : {		//Topic and message type names
-	 <NAMING: (["A"-"Z", "a"-"z", "0"-"9", "/", "_", "~", "~", "[", "]", "*", ".", "-", "<", ">"])+>
+	<NAMING: (["A"-"Z", "a"-"z", "0"-"9", "/", "_", "~", "~", "[", "]", "*", ".", "-", "<", ">"])+>
 }
-
-
-
 
 MonitorFile rvFile() : {
     String preamble;
@@ -264,105 +257,35 @@ Specification specification() : {
     String preDeclarations = "";
     ArrayList<String> languageModifiers = new ArrayList<String>();
     Token modifier;
-    String name = "";
+    String name;
     String languageParameters = "";
     String languageDeclarations = "";
+    String init = "";
     ArrayList<ROSEvent> events = new ArrayList<ROSEvent>();
-    ArrayList<CFunction> cFunctions = new ArrayList<CFunction>();
     ROSEvent myEvent;
-    CFunction myFunc;
     ArrayList<Property> properties = new ArrayList<Property>();
     Property myProperty;
-    String languageDeclaration;
 }
 {
-    (modifier = <ID>)+
-    {   languageModifiers.add(modifier.image);
+    (modifier = <ID> {languageModifiers.add(modifier.image);})+
+    {
         name = languageModifiers.get(languageModifiers.size() - 1);
         languageModifiers.remove(languageModifiers.size() - 1);
     }
     (languageParameters = delimitedNoCurly())?
-        "{" //{languageDeclarations = parseUntilLineMatches(Pattern.compile("[^;]+(;)$")); System.out.println(languageDeclarations);}
+    "{"
+        {languageDeclarations = parseUntilLineMatches(Pattern.compile(
+            "^([-a-zA-Z\\s_]*)(init|event([a-zA-Z_\\s0-9]+))\\("));}
 
-            (
-                LOOKAHEAD(3)
-                (languageDeclaration = parseDeclaration())
-                {languageDeclarations = languageDeclarations + "\n" + languageDeclaration;})*
+		[ <INIT> "(" ")" "{" { init = parseMatchingCurlyBrackets(); } ]
 
-            // Assume events start with "event", functions start with either void or type =/= event
-             ( myFunc =  cFunc(name) {cFunctions.add(myFunc);})*
-             (myEvent = event(name) {events.add(myEvent);})+
-
-            (myProperty = propertyAndHandlers(name) {properties.add(myProperty);})*
-        "}"
-        {
-           return new Specification(preDeclarations, languageModifiers, name, languageParameters,
-                languageDeclarations, cFunctions, events, properties);
-        }
-}
-
-String parseDeclaration() : {
-
-    Token keywordT;
-    Token identifierT;
-    Token typeT;
-
-    String exprT;
-    String decl;
-
-}
-{
-
-    ( (keywordT = <KEYWORD>) (typeT = <ID>) {decl = keywordT.image + " " + typeT.image;}
-      |  LOOKAHEAD(2) (typeT = <ID>) (keywordT = <KEYWORD>) {decl = typeT.image + " " + keywordT.image;}
-      | (typeT = <ID>) {decl = typeT.image;}
-    )
-    (identifierT = <ID>) {decl += " " + identifierT.image;}
-    (
-          <SEMICOLON> {decl += ";";}
-        | <EQUAL> (exprT  = parseExpr()) <SEMICOLON> {decl += " = " + exprT + ";";}
-    )
-    {return decl;}
-}
-
-String parseExpr() : {
-    Token exprT;
-}
-{
-    // Todo: Expand This to include other expressions
-      (  exprT = <ID> {return exprT.image;}
-       |  "\"" exprT = <ID> "\"" {return "\"" + exprT.image + "\"";}
-       | exprT = <DIGITS> {return exprT.image;})
-      {return exprT.image;}
-}
-
-CFunction cFunc(String specName) : {
-   Token returnType;
-   Token name;
-   ArrayList<Parameter> params;
-   String content;
-}
-{
-    (returnType = <ID>) {}
-    (name = <ID>) {}
-    ("(" params = parseParams() {})
-    ( "{" {content = parseMatchingCurlyBrackets();} )
+        (LOOKAHEAD( 2 ) myEvent = event(name) { events.add(myEvent); })+
+        (myProperty = propertyAndHandlers(name) {properties.add(myProperty);})*
+    "}"
     {
-        return new CFunction(returnType.image, name.image, params, content);
-    }
+   return new Specification(preDeclarations, languageModifiers, name, languageParameters,
+        languageDeclarations, events, properties);
 }
-
-ArrayList<Parameter> parseParams() : {
-   ArrayList<Parameter> params;
-   Token paramType;
-   Token paramName;
-}
-{
-     ")" {return new ArrayList<Parameter>();}
-    | (paramType = <ID>) (paramName = <ID>) (params = parseParams())
-        {params.add(new Parameter(paramType.image, paramName.image)); return params;}
-    | "," (paramType = <ID>) (paramName = <ID>) (params = parseParams())
-        { params.add(new Parameter(paramType.image, paramName.image));   return params;}
 }
 
 ROSEvent event(String specName) : {
@@ -378,7 +301,7 @@ ROSEvent event(String specName) : {
     String eventAction = "";
 }
 {
-    //(modifier = <ID> { modifiers.add(modifier.image); })*
+    (modifier = <ID> { modifiers.add(modifier.image); })*
     <EVENT>
     (name = <ID>)
     (definitionModifier = <ID> { definitionModifiers.add(definitionModifier.image); })*
@@ -387,7 +310,7 @@ ROSEvent event(String specName) : {
 	(msgType = <NAMING> /*{System.out.println(msgType.image);}*/)
     "'" {pattern = pattern(pattern, ""); } "'"
     "{" {eventAction = parseMatchingCurlyBrackets();}
-    {return new ROSEvent(modifiers, name.image, definitionModifiers, eventDefinition, topic.image, 
+    {return new ROSEvent(modifiers, name.image, definitionModifiers, eventDefinition, topic.image,
         msgType.image, pattern, eventAction, specName);}
 }
 
@@ -438,11 +361,11 @@ HashMap<String, String> pattern(HashMap<String, String> patterncol, String str):
    HashMap<String, String> patterns = patterncol;
 }
 {
-	"{" 
+	"{"
 		{ innerpattern(patterncol, str); }
 		( LOOKAHEAD(2) <COMMA> { innerpattern(patterncol, str); } )*
 	"}"
-	{ return patterns; }	 
+	{ return patterns; }
 }
 
 void innerpattern(HashMap<String, String> patterncol, String str):
@@ -451,7 +374,7 @@ void innerpattern(HashMap<String, String> patterncol, String str):
 }
 {
 	[ (<NAMING>|<ID>) { t = token.image; str += t; }
-	  <COLON> ( ( (<NAMING>|<ID>) { patterncol.put((String) token.image, str); } ) 
+	  <COLON> ( ( (<NAMING>|<ID>) { patterncol.put((String) token.image, str); } )
 				| { str += "."; pattern(patterncol, str); } )
 	]
 }

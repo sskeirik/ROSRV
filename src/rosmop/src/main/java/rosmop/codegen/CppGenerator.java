@@ -101,16 +101,17 @@ public class CppGenerator {
             printer.printLn("struct " + cspec.getSpecName());
             printer.printLn("{"); printer.indent();
 
-            List<String> declarations = Arrays.asList(cspec.getDeclarations().split("\n"));
-            declarations.forEach(line -> printer.printLn(line));
+            //List<String> declarations = Arrays.asList(cspec.getDeclarations().split("\n"));
+            //declarations.forEach(line -> printer.printLn(line));
+            printer.printLn(cspec.getDeclarations());
 
             // Print Functions in Specification
             // TODO: Get rid of if
-            if(cspec instanceof RVParserAdapter) {
-                String cFunctions = ((RVParserAdapter) cspec).getCFunctions();
-                Arrays.asList(cFunctions.split("\n")).forEach(f -> printer.printLn(f));
-                printer.printLn("");
-            }
+            // if(cspec instanceof RVParserAdapter) {
+            //     String cFunctions = ((RVParserAdapter) cspec).getCFunctions();
+            //     Arrays.asList(cFunctions.split("\n")).forEach(f -> printer.printLn(f));
+            //     printer.printLn("");
+            // }
 
             // DL Specific Code
             // Todo: Make this generic by passing ToolName via rv-monitor
