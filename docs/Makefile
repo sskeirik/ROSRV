@@ -10,7 +10,10 @@ overview.pdf : pandoc-source.md  $(TEX_DIR)/citations.bib
 	pandoc $< -F pandoc-citeproc --number-sections --bibliography $(word 2,$^) --csl $(TEX_DIR)/ieee.csl -f markdown+smart -o $@
 
 dl-integration.pdf : dl-integration-pandoc-source.md $(TEX_DIR)/citations.bib
-	pandoc $< -F pandoc-citeproc --number-sections --bibliography $(word 2,$^) --csl $(TEX_DIR)/ieee.csl -f markdown+smart -o $@
+	pandoc $< -F pandoc-citeproc  --bibliography $(word 2,$^) --csl $(TEX_DIR)/ieee.csl -f markdown+smart -o $@
+
+dl-integration.md : dl-integration-pandoc-source.md $(TEX_DIR)/citations.bib
+	pandoc $< -t gfm -F pandoc-citeproc  --bibliography $(word 2,$^) --csl $(TEX_DIR)/ieee.csl -f markdown+smart -o $@
 
 clean:
 	rm -f *.aux *.tex *.log *.bbl *.blg *.out *.bcf *.xml
