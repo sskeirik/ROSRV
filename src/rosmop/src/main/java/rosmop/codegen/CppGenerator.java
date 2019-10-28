@@ -103,11 +103,6 @@ public class CppGenerator {
 
             printer.printLn(cspec.getDeclarations());
 
-            // Print Functions in Specification
-            if(cspec instanceof Specification) {
-                List<CFunction> cFunctions = ((Specification) cspec).getCFunctions();
-                cFunctions.forEach(f -> printer.printLn(f.toString()));
-            }
 
             // DL Specific Code
             // Todo: Make this generic by passing ToolName via rv-monitor

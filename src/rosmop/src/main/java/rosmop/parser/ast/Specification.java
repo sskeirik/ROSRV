@@ -9,7 +9,7 @@ import java.util.List;
  * @author A. Cody Schuffelen
  */
 public class Specification {
-    
+
     private final String preDeclarations;
     private final List<String> languageModifiers;
     private final String name;
@@ -18,35 +18,33 @@ public class Specification {
     private final String init;
     private final List<ROSEvent> events;
     private final List<Property> properties;
-    
+
     private List<Variable> specDeclarations = new ArrayList<Variable>();
-    
+
     /**
      * Construct the specification out of its children elements.
      * @param languageModifiers Words before the name directing behavior of rv-monitor.
      * @param name The name of the specification.
      * @param languageParameters Parameters used to parameterize the monitor.
      * @param languageDeclarations Language-specific declarations used in the monitoring code.
-     * @param init Initialization block for language declarations
      * @param events The events to monitor in the code.
      * @param properties Properties and handlers on the sequence of events.
      */
-    public Specification(final String preDeclarations, final List<String> languageModifiers, 
-            final String name, final String languageParameters, final String languageDeclarations, 
-            String init, final List<ROSEvent> events, final List<Property> properties) {
+    public Specification(final String preDeclarations, final List<String> languageModifiers,
+                         final String name, final String languageParameters, final String languageDeclarations,
+                         final List<ROSEvent> events, final List<Property> properties) {
         this.preDeclarations = preDeclarations;
-        this.languageModifiers = 
+        this.languageModifiers =
             Collections.unmodifiableList(new ArrayList<String>(languageModifiers));
         this.name = name;
         this.languageParameters = languageParameters;
         this.languageDeclarations = languageDeclarations;
-        this.init = init;
         this.events = Collections.unmodifiableList(new ArrayList<ROSEvent>(events));
         this.properties = Collections.unmodifiableList(new ArrayList<Property>(properties));
-        
-        declarify();
+
+        //declarify();
     }
-    
+
     private void declarify() {
     	languageDeclarations = languageDeclarations.trim();
     	languageDeclarations = languageDeclarations
@@ -67,7 +65,7 @@ public class Specification {
     public List<String> getLanguageModifiers() {
         return languageModifiers;
     }
-    
+
     /**
      * The name of the specification/monitor.
      * @return The name.
@@ -75,7 +73,7 @@ public class Specification {
     public String getName() {
         return name;
     }
-    
+
     /**
      * Variables used to parameterize the monitor, if any.
      * @return The monitor parameters.
@@ -83,7 +81,7 @@ public class Specification {
     public String getLanguageParameters() {
         return languageParameters;
     }
-    
+
     /**
      * Language-specific declarations used inside the monitor.
      * @return Declarations used by the monitor written in the target language.
@@ -91,7 +89,7 @@ public class Specification {
     public String getLanguageDeclarations() {
         return languageDeclarations;
     }
-    
+
     public List<Variable> getSpecDeclarations() {
 		return specDeclarations;
 	}
@@ -107,7 +105,7 @@ public class Specification {
     public List<ROSEvent> getEvents() {
         return events;
     }
-    
+
     /**
      * An unmodifiable list with the logic properties and their handlers.
      * @return The properties with their handlers of the specification.

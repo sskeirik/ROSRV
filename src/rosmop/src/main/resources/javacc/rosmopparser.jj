@@ -39,7 +39,7 @@ public class ROSMOPParser {
 			throw new RuntimeException(e);
 		}
     }
-    
+
     /**
      * Parse a complete RVM file specification.
      * @param reader The place to read the specification from.
@@ -47,10 +47,10 @@ public class ROSMOPParser {
      */
     public static MonitorFile parse(final Reader reader) {
         if (parser == null)
-			parser = new ROSMOPParser(reader); 
+			parser = new ROSMOPParser(reader);
 		else
 			parser.ReInit(reader);
-			
+
         try {
             return parser.rvFile();
         } catch(ParseException e) {
@@ -59,7 +59,7 @@ public class ROSMOPParser {
             throw new RuntimeException(e);
         }
     }
-    
+
     /**
      * Read a backtick segment with matched backticks, e.g. `a`, ``a``, ```a```, or ``a`b``.
      * Assumes the first backtick has already been read.
@@ -98,9 +98,9 @@ public class ROSMOPParser {
             return "";
         }
     }
-    
+
     /**
-     * Reads a segment from the character stream with matching open and close characters, 
+     * Reads a segment from the character stream with matching open and close characters,
      * e.g. (((--)--(--))--).
      * @param open The opening character.
      * @param close The closing character.
@@ -129,7 +129,7 @@ public class ROSMOPParser {
             return "";
         }
     }
-    
+
     /**
      * Parse matching parentheses from the character stream, assuming one is already read.
      * @return The string read, including the first and last parentheses.
@@ -137,7 +137,7 @@ public class ROSMOPParser {
     private String parseMatchingParens() throws ParseException {
         return parseMatchingSegment('(', ')', 1);
     }
-    
+
     /**
      * Parse matching curly brackets from the character stream, assuming one is already read.
      * @return The string read, including the first and last curly brackets.
@@ -145,7 +145,7 @@ public class ROSMOPParser {
     private String parseMatchingCurlyBrackets() throws ParseException {
         return parseMatchingSegment('{', '}', 1);
     }
-    
+
     /**
      * Read characters from the character stream until a string is exactly matched. Pushes the
      * matched text back onto the character stream.
@@ -182,7 +182,7 @@ public class ROSMOPParser {
             return "";
         }
     }
-    
+
     /**
      * Read lines from the character stream until a regular expression matches the line. Pushes
      * the matching line back into the character stream.
@@ -310,7 +310,7 @@ ROSEvent event(String specName) : {
 	(msgType = <NAMING> /*{System.out.println(msgType.image);}*/)
     "'" {pattern = pattern(pattern, ""); } "'"
     "{" {eventAction = parseMatchingCurlyBrackets();}
-    {return new ROSEvent(modifiers, name.image, definitionModifiers, eventDefinition, topic.image, 
+    {return new ROSEvent(modifiers, name.image, definitionModifiers, eventDefinition, topic.image,
         msgType.image, pattern, eventAction, specName);}
 }
 
@@ -361,11 +361,11 @@ HashMap<String, String> pattern(HashMap<String, String> patterncol, String str):
    HashMap<String, String> patterns = patterncol;
 }
 {
-	"{" 
+	"{"
 		{ innerpattern(patterncol, str); }
 		( LOOKAHEAD(2) <COMMA> { innerpattern(patterncol, str); } )*
 	"}"
-	{ return patterns; }	 
+	{ return patterns; }
 }
 
 void innerpattern(HashMap<String, String> patterncol, String str):
@@ -374,7 +374,7 @@ void innerpattern(HashMap<String, String> patterncol, String str):
 }
 {
 	[ (<NAMING>|<ID>) { t = token.image; str += t; }
-	  <COLON> ( ( (<NAMING>|<ID>) { patterncol.put((String) token.image, str); } ) 
+	  <COLON> ( ( (<NAMING>|<ID>) { patterncol.put((String) token.image, str); } )
 				| { str += "."; pattern(patterncol, str); } )
 	]
 }

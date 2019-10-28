@@ -1,6 +1,7 @@
 package rosmop.parser.main_parser;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import rosmop.parser.ast.MonitorFile;
 import rosmop.parser.ast.Property;
@@ -64,5 +65,4 @@ public class ROSMOPParserTest {
             fail(e.getMessage());
         }
     }
-
 }

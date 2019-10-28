@@ -150,10 +150,10 @@ public class HeaderGenerator {
 		}
 
 		for (CSpecification rvcParser : toWrite.keySet()) {
-			if(!hasInit && !((RVParserAdapter) rvcParser).getInit().isEmpty()){
-				printer.printLn("void init();");
-				hasInit = true;
-			}
+//			if(!hasInit && !((RVParserAdapter) rvcParser).getInit().isEmpty()){
+//				printer.printLn("void init();");
+//				hasInit = true;
+//			}
 
 			if(toWrite.get(rvcParser) != null){
 				printer.printLn(
