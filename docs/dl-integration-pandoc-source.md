@@ -229,7 +229,7 @@ Thus, the synthesized monitoring code from the event specification `flow_control
    code, which essentially takes care of `binding` the event parameters to
    relevant fields in the ModelPlex generated `state`.
  - `check_violation` is responsible for making a call to the
-   to ModelPlex-generated `monitorSatisfied` function. Before
+   ModelPlex-generated `monitorSatisfied` function. Before
    the call is made, additional synchronization related steps need to be
    performed, which are describe later.
  - `check_violation` also accepts as input function pointers to
