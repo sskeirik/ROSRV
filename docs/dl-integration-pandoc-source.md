@@ -38,7 +38,7 @@ The rvmaster process identifies monitors by node name,
 and handles connections to monitored topic names specially.
 If `<topicname>` is monitored, ordinary nodes publishing
 to `<topicname>` will be connected to any monitor nodes
-subscribing to `/rv/montiored/<topicname>`,
+subscribing to `/rv/monitored/<topicname>`,
 and any ordinary nodes subscribing to `<topicname>`
 will be connected to any monitor nodes publishing to
 `/rv/monitored/<topicname>`.
@@ -61,7 +61,7 @@ the rvmaster process, which is not a problem on a single-computer
 ROS system, but can be on more sophisticated platforms with
 multiple control computers.
 Moving monitors to separate processes avoids recompiling rvmaster,
-allowed monitors to be used without rvmaster at all, and allows
+allows monitors to be used without rvmaster at all, and allows
 monitors to be co-located with the major publishers and subscribers
 of a topic.
 
