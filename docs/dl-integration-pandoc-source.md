@@ -34,13 +34,14 @@ ROS master is not considered an error), with
 a configuration file specifying the topics to
 be monitored.
 
-The rvmaster process recognizes monitors by the
-topic names they attempt to connect to.
-If `<topicname>` is monitored, nodes publishing
-to `<topicname>` will be connected to any nodes
-subscribing to `/rv/montiored/<topicname>`
-and any nodes publishing to `/rv/monitored/<topicname>`
-will be connected to nodes subscribing to `<topicname>`.
+The rvmaster process identifies monitors by node name,
+and handles connections to monitored topic names specially.
+If `<topicname>` is monitored, ordinary nodes publishing
+to `<topicname>` will be connected to any monitor nodes
+subscribing to `/rv/montiored/<topicname>`,
+and any ordinary nodes subscribing to `<topicname>`
+will be connected to any monitor nodes publishing to
+`/rv/monitored/<topicname>`.
 Establishing a node-to-node connection in ROS
 includes exchanging the expected topic name and type,
 so to allow these connections to succeed a ROSRV-generated
