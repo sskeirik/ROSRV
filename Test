@@ -63,7 +63,7 @@ test_without_rvmaster() {
     rosrun rvmonitor test-isolated-monitor & sleep 1
 
     progress "Running tests"
-    pytest t/test-without-rvmaster.py
+    pytest t/
 
     cleanup
 }
