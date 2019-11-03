@@ -30,8 +30,8 @@ struct MonitorState
     void initialize(std::vector<std::string> variables) {
 	this->logicalVariables = variables;
 
-	bool prevStateExistsFlag;
-	bool isInitializedFlag;
+	prevStateExistsFlag = false;
+	isInitializedFlag = false;
 
 	for(auto variable : variables) {
 	    prevStateMap[variable] = false;

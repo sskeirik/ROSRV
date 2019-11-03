@@ -1,3 +1,4 @@
+#include <rv/dl.h>
 testDlWatertankSpec() {
 
     void pre_check_actions() {
@@ -26,7 +27,8 @@ testDlWatertankSpec() {
 	update_l(static_cast<long double>(l));
     }
 
-    event flow_controller_input(float f, int32_t t) /flow_control_cmd marti_common_msgs/Float32Stamped '{value:f, header:{stamp:{sec:t}}}'
+    event flow_controller_input(float f, ros::Time cTime) /flow_control_cmd
+	marti_common_msgs/Float32Stamped '{value:f, header:{stamp:cTime}}'
     {
 	update_f(static_cast<long double>(f));
 	update_c(static_cast<long double>(cTime.toSec()));
