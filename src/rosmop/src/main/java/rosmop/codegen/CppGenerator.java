@@ -147,6 +147,15 @@ public class CppGenerator {
                                           + " &" + cspec.getSpecName() + "::" + callbackNameForEvent(event)
                                           + ");");
             }
+
+            // Any Generated Code to be inserted into constructor
+            if(!isRawSpec) {
+                Arrays.stream(((String) toWrite.get(cspec).properties.getOrDefault("constructor content", ""))
+                        .split("\n"))
+                        .forEach(line -> printer.printLn(line.trim()));
+
+            }
+
             printer.unindent(); printer.printLn("}");
 
 
