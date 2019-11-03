@@ -157,7 +157,7 @@ public class HeaderGenerator {
 
 			if(toWrite.get(rvcParser) != null){
 				printer.printLn(
-						(String) toWrite.get(rvcParser).properties.get("header declarations"));
+						(String) toWrite.get(rvcParser).properties.getOrDefault("header declarations", ""));
 			}
 		}
 	}

@@ -8,7 +8,6 @@ import org.apache.commons.io.FilenameUtils;
 
 import rosmop.ROSMOPException;
 import rosmop.RVParserAdapter;
-import rosmop.parser.ast.CFunction;
 import rosmop.parser.ast.ROSEvent;
 import rosmop.parser.ast.Specification;
 import rosmop.parser.ast.Variable;

@@ -32,13 +32,14 @@ public class Specification {
      */
     public Specification(final String preDeclarations, final List<String> languageModifiers,
                          final String name, final String languageParameters, final String languageDeclarations,
-                         final List<ROSEvent> events, final List<Property> properties) {
+                         final String init, final List<ROSEvent> events, final List<Property> properties) {
         this.preDeclarations = preDeclarations;
         this.languageModifiers =
             Collections.unmodifiableList(new ArrayList<String>(languageModifiers));
         this.name = name;
         this.languageParameters = languageParameters;
         this.languageDeclarations = languageDeclarations;
+	this.init = init;
         this.events = Collections.unmodifiableList(new ArrayList<ROSEvent>(events));
         this.properties = Collections.unmodifiableList(new ArrayList<Property>(properties));
 
