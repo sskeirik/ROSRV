@@ -50,29 +50,20 @@ def dl_pipeline(ros_init):
     def run_dl_pipeline(test_packets):
         rate = ros.Rate(2); #Hz
         for packet in test_packets:
-            # register publisher
-            publisher = ros.Publisher(packet.send_topic(), packet.msg_class, queue_size=10)
+            # register callbacks and publishers
+            publisher = ros.Publisher(packet.send_topic(), packet.msg_class, queue_size=1)
             rate.sleep()
             for unstamed_msg in packet.to_send:
                 stamped_msg = packet.stamp_msg(unstamed_msg)
                 # send stamped message
                 publisher.publish(stamped_msg)
-                recieved_msg = ros.wait_for_message(packet.topic_name, packet.msg_class)
-                packet.recieved = packet.recieved + [packet.to_formatted_string(recieved_msg)]
-            rate.sleep();rate.sleep()
+                # Recieve in 5 seconds or timeout
+                recieved_packet = ros.wait_for_message(packet.topic_name, packet.msg_class, 5)
+                packet.recieved = packet.recieved + [packet.to_formatted_string(recieved_packet)]
+            rate.sleep()
     return run_dl_pipeline
 
 prefix = 'rv/monitored'
-
-def test_roscore__unmonitored_dl_watertank(dl_pipeline):
-   sensor_packets = [ Float32Packet( '/level_sensor', [x], '') for x in [0.5, 0.5] ]
-
-   control_packets = [ Float32StampedPacket( '/flow_control_cmd', [x], '') for x in [0.0, 0.7] ]
-   dl_pipeline( [ sensor_packets[0], control_packets[0]
-                , sensor_packets[1], control_packets[1] ])
-
-   # Unsafe Control Command Forwarded
-   assert(control_packets[1].recieved[0] == '0.7')
 
 def test_roscore__monitored_dl_watertank_unsafe(dl_pipeline, launch_monitor):
    launch_monitor('monitor-dl-watertank')
@@ -86,21 +77,21 @@ def test_roscore__monitored_dl_watertank_unsafe(dl_pipeline, launch_monitor):
    # Unsafe Control Changed to safe control
    assert(control_packets[1].recieved[0] == '0.0')
 
-def test_roscore__monitored_dl_watertank_safe_after_unsafe(dl_pipeline, launch_monitor, capsys):
-    with(capsys.disabled()):
-        launch_monitor('monitor-dl-watertank')
-        sensor_packets = [ Float32Packet( '/level_sensor', [x], prefix) for x in [0.0, 0.0, 0.0] ]
+def test_roscore__monitored_dl_watertank_safe_after_unsafe(dl_pipeline, launch_monitor):
+    launch_monitor('monitor-dl-watertank')
+    sensor_packets = [ Float32Packet( '/level_sensor', [x], prefix) for x in [0.0, 0.0, 0.0] ]
 
-        control_packets = [ Float32StampedPacket( '/flow_control_cmd', [x], prefix)
-               for x in [0.0, 0.5, 0.1] ]
-        dl_pipeline( [ sensor_packets[0], control_packets[0]
-                    , sensor_packets[1], control_packets[1]
-                    , sensor_packets[2], control_packets[2] ])
-        rate = ros.Rate(10)
-        rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()
+    control_packets = [ Float32StampedPacket( '/flow_control_cmd', [x], prefix)
+           for x in [0.0, 0.5, 0.1] ]
+    print("Before control_packet[2] --" + str(control_packets[2].recieved))
+    dl_pipeline( [ sensor_packets[0], control_packets[0]
+                , sensor_packets[1], control_packets[1]
+                , sensor_packets[2], control_packets[2] ])
+    rate = ros.Rate(10)
+    rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()
 
-        # Unsafe Control Changed to safe control
-        assert(control_packets[1].recieved[0] == '0.0')
-        # Safe Control resumption after unsafe control
-        assert(control_packets[2].recieved[0] == '0.1')
+    # Unsafe Control Changed to safe control
+    assert(control_packets[1].recieved[0] == '0.0')
+    # Safe Control resumption after unsafe control
+    assert(control_packets[2].recieved[0] == '0.1')
 
