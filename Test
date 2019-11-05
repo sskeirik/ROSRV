@@ -46,7 +46,7 @@ test_against_rvmaster() {
     rosrun rvmonitor monitor-single-parameter --with-rvmaster & sleep 1
 
     progress "Running tests"
-    pytest t/test-against-rvmaster.py
+    pytest t/test_against_rvmaster.py
 
     cleanup
 }
@@ -60,6 +60,7 @@ test_without_rvmaster() {
     sleep 1
 
     progress "Running tests"
+    pytest t/test_without_rvmaster.py
     pytest t/test_dl_pipeline.py
 
     cleanup
@@ -67,5 +68,5 @@ test_without_rvmaster() {
 
 source devel/setup.bash
 ( progress test_without_rvmaster ; test_without_rvmaster )
-#( progress test_against_rvmaster ; test_against_rvmaster )
+( progress test_against_rvmaster ; test_against_rvmaster )
 clean_exit 0
