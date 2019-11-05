@@ -104,8 +104,6 @@ target_link_libraries(librvmonitor ${catkin_LIBRARIES})
 
 ## monitor
 
-option(BUILD_TESTS "BUILD Tests Monitors" OFF)
-
 function(build_monitor spec_file monitor_name)
   set(output_prefix ${PROJECT_BINARY_DIR}/monitors/${monitor_name})
   add_custom_command(
@@ -121,6 +119,12 @@ function(build_monitor spec_file monitor_name)
   target_link_libraries(${monitor_name} librvmonitor)
 endfunction()
 
+
+option(BUILD_TESTS "BUILD Tests Monitors" OFF)
+
+# Build Tests
+#------------
+
 if(BUILD_TESTS)
     build_monitor(${PROJECT_SOURCE_DIR}/specs/single-parameter.rv monitor-single-parameter)
     build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-parameters.rv monitor-multiple-parameters)
@@ -128,7 +132,17 @@ if(BUILD_TESTS)
     build_monitor(${PROJECT_SOURCE_DIR}/specs/dl-watertank.rv monitor-dl-watertank)
 endif(BUILD_TESTS)
 
-## Add gtest based cpp test target and link libraries
+if(DEFINED PROVIDED_SPEC_FILE)
+    if(DEFINED PROVIDED_MONITOR_NAME)
+	build_monitor(${PROVIDED_SPEC_FILE} ${PROVIDED_MONITOR_NAME})
+    else()
+	get_filename_component(MONITOR_NAME ${PROVIDED_SPEC_FILE} NAME_WE)
+	build_monitor(${PROVIDED_SPEC_FILE} "ROSRV-monitor-${MONITOR_NAME}")
+    endif()
+endif()
+
+
+# Add gtest based cpp test target and link libraries
 # catkin_add_gtest(${PROJECT_NAME}-test test/test_rvmonitor.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
