@@ -1,4 +1,33 @@
-#!/bin/bash
-SHDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+#!/usr/bin/python2
 
-python $SHDIR/rosrv.py $@
+from __future__ import print_function
+import argparse, os, sys
+from subprocess import check_call
+
+parser = argparse.ArgumentParser(description='ROSRV Monitor Node Generator')
+
+parser.add_argument( 'spec_file'
+		   , help='The location of the spec file'
+		   )
+
+parser.add_argument( '-o', '--output'
+		   , help='Name of the monitor executable'
+		   )
+
+args = parser.parse_args()
+
+# Check File Exists
+if not os.path.exists(args.spec_file):
+    print(args.spec_file + " Spec File not found", file=sys.stderr)
+    sys.exit(1)
+
+
+spec_file_path = os.path.abspath(args.spec_file)
+if args.output:
+    check_call( ['/usr/bin/env', 'catkin', 'build', 'rvmonitor'
+  	      , ('-DPROVIDED_SPEC_FILE=' + spec_file_path)
+  	      , ('-DPROVIDED_MONITOR_NAME=' + args.output) ])
+else:
+    check_call( ['/usr/bin/env', 'catkin', 'build', 'rvmonitor'
+              , ('-DPROVIDED_SPEC_FILE=' + spec_file_path) ])
+
