@@ -27,7 +27,7 @@ progress "Building rosmop"
 (cd src/rosmop ; mvn -q package -DskipTests)
 
 progress "Building src"
-catkin build --cmake-args -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON --
+catkin build --cmake-args -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON --
 
 test_against_rvmaster() {
     export ROS_MASTER_URI="http://localhost:11311/"

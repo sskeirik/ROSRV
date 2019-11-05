@@ -104,6 +104,8 @@ target_link_libraries(librvmonitor ${catkin_LIBRARIES})
 
 ## monitor
 
+option(BUILD_TESTS "BUILD Tests Monitors" OFF)
+
 function(build_monitor spec_file monitor_name)
   set(output_prefix ${PROJECT_BINARY_DIR}/monitors/${monitor_name})
   add_custom_command(
@@ -119,10 +121,12 @@ function(build_monitor spec_file monitor_name)
   target_link_libraries(${monitor_name} librvmonitor)
 endfunction()
 
-build_monitor(${PROJECT_SOURCE_DIR}/specs/single-parameter.rv monitor-single-parameter)
-build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-parameters.rv monitor-multiple-parameters)
-build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-channels.rv monitor-multiple-channels)
-build_monitor(${PROJECT_SOURCE_DIR}/specs/dl-watertank.rv monitor-dl-watertank)
+if(BUILD_TESTS)
+    build_monitor(${PROJECT_SOURCE_DIR}/specs/single-parameter.rv monitor-single-parameter)
+    build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-parameters.rv monitor-multiple-parameters)
+    build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-channels.rv monitor-multiple-channels)
+    build_monitor(${PROJECT_SOURCE_DIR}/specs/dl-watertank.rv monitor-dl-watertank)
+endif(BUILD_TESTS)
 
 ## Add gtest based cpp test target and link libraries
 # catkin_add_gtest(${PROJECT_NAME}-test test/test_rvmonitor.cpp)
