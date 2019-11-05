@@ -59,9 +59,12 @@ test_without_rvmaster() {
     roscore -p 20022 >/dev/null  &
     sleep 1
 
-    progress "Running tests"
+    progress "Running simple tests"
     pytest t/test_without_rvmaster.py
-    pytest t/test_dl_pipeline.py
+
+
+    progress "Running dL tests"
+    pytest t/test_dl_without_rvmaster.py
 
     cleanup
 }
