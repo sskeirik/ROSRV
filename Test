@@ -40,7 +40,7 @@ test_against_rvmaster() {
 
     # TODO: Fix issue with dl tests
     progress "Running Simple Tests With RVMaster"
-    pytest --with-rvmaster --skip-dl-tests t/tests_basic.py
+    pytest --with-rvmaster --skip-dl-tests t/test_monitors.py
 
     cleanup
 }
@@ -54,7 +54,7 @@ test_without_rvmaster() {
     sleep 1
 
     progress "Running Simple Tests Without RVMaster"
-    pytest  t/tests_basic.py
+    pytest  t/test_monitors.py
 
     cleanup
 }
