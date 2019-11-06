@@ -136,7 +136,7 @@ def dl_pipeline(session_init, get_options):
                 # send stamped message
                 publisher.publish(stamped_msg)
                 # Recieve in 5 seconds or timeout
-                recieved_packet = ros.wait_for_message(packet.topic_name, packet.msg_class, 5)
+                recieved_packet = ros.wait_for_message(packet.topic_name, packet.msg_class, 10)
                 packet.recieved = packet.recieved + [packet.to_formatted_string(recieved_packet)]
             rate.sleep()
     return run_dl_pipeline
@@ -198,7 +198,6 @@ def test_roscore__monitored_dl_watertank_safe_after_unsafe(dl_pipeline, launch_m
 
     control_packets = [ Float32StampedPacket( '/flow_control_cmd', [x])
            for x in [0.0, 0.5, 0.1] ]
-    print("Before control_packet[2] --" + str(control_packets[2].recieved))
     dl_pipeline( [ sensor_packets[0], control_packets[0]
                 , sensor_packets[1], control_packets[1]
                 , sensor_packets[2], control_packets[2] ])
