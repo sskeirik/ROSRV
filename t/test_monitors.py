@@ -168,6 +168,7 @@ def test_roscore__monitored_multiparam_multichannel(simple_pipeline, launch_moni
 # Dl Tests
 # ========
 
+# TODO: Replace instance callback on shared topics with static callbacks
 @pytest.mark.dlTest
 def test_roscore__monitored_dl_watertank_unsafe(simple_pipeline, launch_monitor):
    h = ros.Header()
@@ -181,7 +182,7 @@ def test_roscore__monitored_dl_watertank_unsafe(simple_pipeline, launch_monitor)
    rate = ros.Rate(10)
    rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()
    # Unsafe Control Changed to safe control
-   assert(control_packets[1].recieved[0] == '0.0')
+   assert(control_packets[1].recieved[-1] == '0.0')
 
 @pytest.mark.dlTest
 def test_roscore__monitored_dl_watertank_safe_after_unsafe(simple_pipeline, launch_monitor):
@@ -198,7 +199,8 @@ def test_roscore__monitored_dl_watertank_safe_after_unsafe(simple_pipeline, laun
     rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()
 
     # Unsafe Control Changed to safe control
-    assert(control_packets[1].recieved[0] == '0.0')
+    assert(control_packets[1].recieved[1] == '0.0')
+
     # Safe Control resumption after unsafe control
-    assert(control_packets[2].recieved[0] == '0.1')
+    assert(control_packets[2].recieved[-1] == '0.1')
 
