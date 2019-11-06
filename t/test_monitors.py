@@ -25,6 +25,10 @@ class RosTestPacket(object):
     def callback(self, msg):
         self.recieved += [self.to_formatted_string(msg)]
 
+    def stamp_msg(self, msg):
+        return msg
+
+
 # Derived Test Packets
 # ====================
 
@@ -43,6 +47,7 @@ class ColorRGBAPacket(RosTestPacket):
     def to_formatted_string(self, msg):
         return '({},{},{},{})'.format(msg.r, msg.g, msg.b, msg.a)
 
+
 class Float32Packet(RosTestPacket):
 
     def __init__(self, topic_name, to_send):
@@ -51,8 +56,8 @@ class Float32Packet(RosTestPacket):
     def to_formatted_string(self, msg):
         return "{0:0.1f}".format(msg.data)
 
-    def stamp_msg(self, value):
-        return Float32(value)
+    def stamp_msg(self, msg):
+        return msg
 
 class Float32StampedPacket(RosTestPacket):
 
@@ -63,10 +68,10 @@ class Float32StampedPacket(RosTestPacket):
     def to_formatted_string(self, msg):
         return "{0:0.1f}".format(msg.value)
 
-    def stamp_msg(self, value):
+    def stamp_msg(self, msg):
         h = ros.Header()
         h.stamp = ros.Time.now()
-        return Float32Stamped(h, value)
+        return Float32Stamped(h, msg.value)
 
 # Fixtures
 #=========
@@ -107,8 +112,12 @@ def simple_pipeline(request, session_init, get_options):
             # register callbacks
             ros.Subscriber(packet.topic_name, packet.msg_class, packet.callback)
             rate.sleep()
-            for msg in packet.to_send:
-                check_call(['rostopic', 'pub', '--once', prefix + packet.topic_name, packet.msg_type, msg])
+            for unstamped_msg in packet.to_send:
+                stamped_msg = packet.stamp_msg(unstamped_msg)
+                check_call(['rostopic', 'pub', '--once'
+                           , prefix + packet.topic_name
+                           , packet.msg_type
+                           , str(stamped_msg)])
             rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()
     return run_simple_pipeline
 
@@ -121,25 +130,6 @@ def launch_monitor(request, get_options):
         request.addfinalizer(cleanup)
         return True
     return run_launch_monitor
-
-@pytest.fixture()
-def dl_pipeline(session_init, get_options):
-    def run_dl_pipeline(test_packets):
-        prefix = get_options['topic_prefix']
-        rate = ros.Rate(2); #Hz
-        for packet in test_packets:
-            # register callbacks and publishers
-            publisher = ros.Publisher(prefix + packet.topic_name, packet.msg_class, queue_size=1)
-            rate.sleep()
-            for unstamed_msg in packet.to_send:
-                stamped_msg = packet.stamp_msg(unstamed_msg)
-                # send stamped message
-                publisher.publish(stamped_msg)
-                # Recieve in 5 seconds or timeout
-                recieved_packet = ros.wait_for_message(packet.topic_name, packet.msg_class, 10)
-                packet.recieved = packet.recieved + [packet.to_formatted_string(recieved_packet)]
-            rate.sleep()
-    return run_dl_pipeline
 
 
 # Basic Tests
@@ -179,11 +169,13 @@ def test_roscore__monitored_multiparam_multichannel(simple_pipeline, launch_moni
 # ========
 
 @pytest.mark.dlTest
-def test_roscore__monitored_dl_watertank_unsafe(dl_pipeline, launch_monitor):
+def test_roscore__monitored_dl_watertank_unsafe(simple_pipeline, launch_monitor):
+   h = ros.Header()
+   h.stamp = ros.Time.now()
    launch_monitor('monitor-dl-watertank')
    sensor_packets = [ Float32Packet( '/level_sensor', [x]) for x in [0.0, 0.0] ]
-   control_packets = [ Float32StampedPacket( '/flow_control_cmd', [x]) for x in [0.0, 0.7] ]
-   dl_pipeline( [ sensor_packets[0], control_packets[0]
+   control_packets = [ Float32StampedPacket( '/flow_control_cmd', [Float32Stamped(h, x)]) for x in [0.0, 0.7] ]
+   simple_pipeline( [ sensor_packets[0], control_packets[0]
                 , sensor_packets[1], control_packets[1] ])
 
    rate = ros.Rate(10)
@@ -192,13 +184,14 @@ def test_roscore__monitored_dl_watertank_unsafe(dl_pipeline, launch_monitor):
    assert(control_packets[1].recieved[0] == '0.0')
 
 @pytest.mark.dlTest
-def test_roscore__monitored_dl_watertank_safe_after_unsafe(dl_pipeline, launch_monitor):
+def test_roscore__monitored_dl_watertank_safe_after_unsafe(simple_pipeline, launch_monitor):
+    h = ros.Header()
+    h.stamp = ros.Time.now()
     launch_monitor('monitor-dl-watertank')
     sensor_packets = [ Float32Packet( '/level_sensor', [x]) for x in [0.0, 0.0, 0.0] ]
 
-    control_packets = [ Float32StampedPacket( '/flow_control_cmd', [x])
-           for x in [0.0, 0.5, 0.1] ]
-    dl_pipeline( [ sensor_packets[0], control_packets[0]
+    control_packets = [ Float32StampedPacket( '/flow_control_cmd', [Float32Stamped(h, x)]) for x in [0.0, 0.5, 0.1] ]
+    simple_pipeline( [ sensor_packets[0], control_packets[0]
                 , sensor_packets[1], control_packets[1]
                 , sensor_packets[2], control_packets[2] ])
     rate = ros.Rate(10)
