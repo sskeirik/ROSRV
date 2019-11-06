@@ -38,15 +38,8 @@ test_against_rvmaster() {
     ROS_MASTER_URI="$REAL_MASTER_URI" roscore -p 20022  >/dev/null &
     sleep 1
 
-    progress "Running rvmaster"
-    rosrun rvmaster rvmaster --monitor-topic /monitored --monitor-topic /chatter >/dev/null &
-    sleep 1
-
-    progress "Running monitor"
-    rosrun rvmonitor monitor-single-parameter --with-rvmaster & sleep 1
-
-    progress "Running tests"
-    pytest t/test_against_rvmaster.py
+    progress "Running Simple Tests With RVMaster"
+    pytest --with-rvmaster t/tests_basic.py
 
     cleanup
 }
@@ -59,12 +52,8 @@ test_without_rvmaster() {
     roscore -p 20022 >/dev/null  &
     sleep 1
 
-    progress "Running simple tests"
-    pytest t/test_without_rvmaster.py
-
-
-    progress "Running dL tests"
-    pytest t/test_dl_without_rvmaster.py
+    progress "Running Simple Tests Without RVMaster"
+    pytest  t/tests_basic.py
 
     cleanup
 }
