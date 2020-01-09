@@ -2,6 +2,7 @@ package rosmop.codegen;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import rosmop.ROSMOPException;
@@ -32,6 +33,7 @@ public class HeaderGenerator {
 		addedTopics.clear();
 	}
 
+
 	/**
 	 * Gathers all the information for the monitor header file and prints necessary parts
 	 * @param toWrite Collection of specifications and their formalisms if existent
@@ -51,6 +53,17 @@ public class HeaderGenerator {
 		for (CSpecification rvcParser : toWrite.keySet()) {
 			printer.printLn(rvcParser.getIncludes());
 			printer.printLn("");
+			boolean isRawSpec = (toWrite.get(rvcParser) == null);
+
+			if(!isRawSpec && rvcParser.getFormalism().equalsIgnoreCase("DL")) {
+				printer.printLn("namespace modelplex_generated");
+				printer.printLn("{");
+				printer.indent();
+				String modelplexCpp = (String) toWrite.get(rvcParser).properties.getOrDefault("monitoring body", "\n");
+				Arrays.asList(modelplexCpp.split("\n")).forEach(l -> printer.printLn(l));
+			 	printer.unindent();
+				printer.printLn("};");
+			}
 		}
 		populateAddedTopics(toWrite);
 		if(! monitorAsNode) {
@@ -137,14 +150,14 @@ public class HeaderGenerator {
 		}
 
 		for (CSpecification rvcParser : toWrite.keySet()) {
-			if(!hasInit && !((RVParserAdapter) rvcParser).getInit().isEmpty()){
-				printer.printLn("void init();");
-				hasInit = true;
-			}
+//			if(!hasInit && !((RVParserAdapter) rvcParser).getInit().isEmpty()){
+//				printer.printLn("void init();");
+//				hasInit = true;
+//			}
 
 			if(toWrite.get(rvcParser) != null){
 				printer.printLn(
-						(String) toWrite.get(rvcParser).properties.get("header declarations"));
+						(String) toWrite.get(rvcParser).properties.getOrDefault("header declarations", ""));
 			}
 		}
 	}

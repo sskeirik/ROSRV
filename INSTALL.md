@@ -1,35 +1,44 @@
 # Installing ROSRV
 
-Here are instructions for installing and building ROSRV by checking out its 
+Here are instructions for installing and building ROSRV by checking out its
 source code on GitHub.
 
 ## Prerequisites
 
-ROSRV currently works with ROS Groovy Galapagos release. For monitoring 
-purposes, ROSRV depends on ROSMOP.
+### Core Prerequisites
 
-1. [Git](http://git-scm.com/book/en/Getting-Started-Installing-Git)
-v.1.8 or higher
- * Check Git is installed properly: run `git` from a terminal.
-2. [ROS Groovy Galapagos](http://wiki.ros.org/groovy)
-3. [ROSMOP](http://fsl.cs.illinois.edu/index.php/ROSMOP)
- * Please check the 
-   [ROSMOP Installation guide](https://github.com/runtimeverification/rosmop/blob/master/INSTALL.md).
+1. [ROS Kinetic](http://wiki.ros.org/kinetic)
+2. [PyTest](https://docs.pytest.org/)
+3. [Maven](https://maven.apache.org)
+4. [Catkin](http://wiki.ros.org/catkin)
+
+### RV-Monitor
+
+1. [RV-Monitor](https://github.com/runtimeverification/rv-monitor)
+    To use RV-Monitor supported logics RV-Monitor install RV-Monitor
+    using the instructions at the tool's page (use `mvn install`
+    to install snapshot to local maven repository).
+    Set environment variable `RVMONITOR` to point to `rv-monitor's`
+    root directory.
 
 ## Install and Build
 
-1. Run `git clone --recursive https://github.com/runtimeverification/ROSRV.git` 
-to check out the source code from the Github repository, including 
-[ROSMOP](https://github.com/runtimeverification/rosmop).
+1. After Installing Prerequisites, run `./Test` to
+   Build and Run Tests.
 
-2. Add `<ROSRV_HOME>/bin` to your PATH.
+2. The default behavior of the testing setup is to run
+   all tests. Use `PYTEST_FLAGS="--skip-dl-tests"` to
+   skip Differential Dynamic Logic based tests.
 
-3. Run 
- * `cd <ROSRV_HOME>`
- * `catkin_make`
+### Running
+ROSRV can simply be treated as a catkin project, and
+dropped into an existing catkin workspace.
 
-4. Make sure the target package builds successfully.
+The `bin/rosrv` provides a wrapper to the
+C++ code generator. For example `bin/rosrv <SPEC_FILE> -o [MONITOR_NAME]`
+will generate a monitor `MONITOR_NAME` which can be run
+via catkin as `catkin run rvmonitor <MONITOR_NAME>`.
 
-See [docs/Usage.md](docs/Usage.md) for information on how to run ROSRV.
+See [docs/Usage.md](docs/Usage.md) for further information on how to run ROSRV.
 Get help or report problems on
-[ROSRV's issues page](https://github.com/runtimeverification/ROSRV/issues).
+[ROSRV's issues page](https://github.com/FormalSystemsLaboratory/ROSRV/issues).

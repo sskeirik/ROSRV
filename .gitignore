@@ -9,5 +9,7 @@
 
 # Dev artifacts
 tags
-/src/RVMaster/__pycache__/
+__pycache__/
 *~
+*.iml
+

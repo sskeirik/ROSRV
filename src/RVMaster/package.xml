@@ -8,6 +8,7 @@
   <license>TODO</license>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>rvmonitor</build_depend>
   <build_depend>roscpp</build_depend>
   <run_depend>roscpp</run_depend>
 
