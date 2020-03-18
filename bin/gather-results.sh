@@ -2,6 +2,7 @@
 
 if [ "$#" -ne 1 ]; then
   echo "usage: gather-results.sh <test-name>"
+  exit 1
 fi
 
 SHDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
