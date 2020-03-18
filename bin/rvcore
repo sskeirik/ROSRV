@@ -3,12 +3,8 @@
 SHDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DIR="$(dirname $SHDIR)"
 
-function startup() {
-	source devel/setup.sh
-	source bin/rvmaster
-}
+ROS_MASTER_URI="http://localhost:12345" roscore -p 12345 &
 
-roscore -p 12345 &
+sleep 2
 
-export -f startup
-gnome-terminal --working-directory=$DIR --execute bash -c "startup ; bash"
+source $DIR/bin/rvmaster

@@ -126,10 +126,7 @@ option(BUILD_TESTS "BUILD Tests Monitors" OFF)
 #------------
 
 if(BUILD_TESTS)
-    build_monitor(${PROJECT_SOURCE_DIR}/specs/single-parameter.rv monitor-single-parameter)
-    build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-parameters.rv monitor-multiple-parameters)
-    build_monitor(${PROJECT_SOURCE_DIR}/specs/multiple-channels.rv monitor-multiple-channels)
-    build_monitor(${PROJECT_SOURCE_DIR}/specs/dl-watertank.rv monitor-dl-watertank)
+    build_monitor(${PROJECT_SOURCE_DIR}/specs/fixed-output.rv monitor-fixed-output)
 endif(BUILD_TESTS)
 
 if(DEFINED PROVIDED_SPEC_FILE)

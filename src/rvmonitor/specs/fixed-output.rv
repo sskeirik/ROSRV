@@ -1,0 +1,12 @@
+#include <cstring>
+#include <string>
+#include "ros/ros.h"
+
+testSpecOne() {
+
+    event fixed_output(std::string msg) /chatter std_msgs/String '{data:msg}'
+    {
+        msg = "B";
+    }
+
+}

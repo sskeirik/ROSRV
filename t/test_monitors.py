@@ -40,48 +40,6 @@ class StringPacket(RosTestPacket):
     def to_formatted_string(cls, msg):
         return msg.data
 
-
-class ColorRGBAPacket(RosTestPacket):
-    def __init__(self, topic_name, to_send, callback):
-        super(ColorRGBAPacket, self).__init__( topic_name
-                                             , ColorRGBA, 'std_msgs/ColorRGBA'
-                                             , to_send, callback)
-
-    @classmethod
-    def to_formatted_string(cls, msg):
-        return '({},{},{},{})'.format(msg.r, msg.g, msg.b, msg.a)
-
-
-class Float32Packet(RosTestPacket):
-
-    def __init__(self, topic_name, to_send, callback):
-        super(Float32Packet, self).__init__( topic_name
-                                           , Float32, 'std_msgs/Float32'
-                                           , to_send, callback)
-
-    @classmethod
-    def to_formatted_string(cls, msg):
-        return "{0:0.1f}".format(msg.data)
-
-    def stamp_msg(self, msg):
-        return msg
-
-class Float32StampedPacket(RosTestPacket):
-
-    def __init__(self, topic_name, to_send, callback):
-        super(Float32StampedPacket, self).__init__( topic_name
-                                                  , Float32Stamped , 'marti_common_msgs/Float32Stamped'
-                                                  , to_send, callback)
-
-    @classmethod
-    def to_formatted_string(cls, msg):
-        return "{0:0.1f}".format(msg.value)
-
-    def stamp_msg(self, msg):
-        h = ros.Header()
-        h.stamp = ros.Time.now()
-        return Float32Stamped(h, msg.value)
-
 # Fixtures
 #=========
 
@@ -159,6 +117,7 @@ def test_roscore__unmonitored_channel_pipeline(simple_pipeline):
     string_callback = CallBack(StringPacket.to_formatted_string)
     test_packets = [StringPacket('/unmonitored', ['Hi!'], string_callback)]
     simple_pipeline(test_packets)
+
     assert ['Hi!'] == string_callback.recieved_list
 
 def test_roscore__monitored_channel__no_monitor_running(simple_pipeline):
@@ -169,91 +128,9 @@ def test_roscore__monitored_channel__no_monitor_running(simple_pipeline):
     assert([] == string_callback.recieved_list)
 
 def test_roscore__monitored_channel(simple_pipeline, launch_monitor):
-    launch_monitor('monitor-single-parameter')
+    launch_monitor('monitor-fixed-output')
     string_callback = CallBack(StringPacket.to_formatted_string)
     test_packets = [StringPacket('/chatter', ['Hi!', 'Hi!'], string_callback)]
     simple_pipeline(test_packets)
 
-    assert(['Hi!RV1', 'Hi!RV2'] == string_callback.recieved_list)
-
-def test_roscore__monitored_multiparam_channel(simple_pipeline, launch_monitor):
-    launch_monitor('monitor-multiple-parameters')
-    color_rgba_callback = CallBack(ColorRGBAPacket.to_formatted_string)
-    test_packets = [ ColorRGBAPacket( '/color_chatter'
-                                    , [str(ColorRGBA(100 ,100 ,100 ,0.5))]
-                                    , color_rgba_callback)]
-    simple_pipeline(test_packets)
-
-    assert(['(105.0,110.0,115.0,0.5)'] == color_rgba_callback.recieved_list)
-
-def test_roscore__monitored_multiparam_multichannel(simple_pipeline, launch_monitor):
-    launch_monitor('monitor-multiple-channels')
-    color_rgba_callback = CallBack(ColorRGBAPacket.to_formatted_string)
-    string_callback = CallBack(StringPacket.to_formatted_string)
-    test_packets = [ ColorRGBAPacket('/color_chatter'
-                                    , [str(ColorRGBA(100 ,100 ,100 ,0.5))]
-                                    , color_rgba_callback)
-                   , StringPacket('/chatter', ['Hi!'], string_callback)]
-    simple_pipeline(test_packets)
-
-    assert(['(105.0,110.0,115.0,0.5)'] == color_rgba_callback.recieved_list)
-    assert(['Hi!RV']                   == string_callback.recieved_list)
-
-# Dl Tests
-# ========
-
-@pytest.mark.dlTest
-def test_roscore__monitored_dl_watertank_unsafe(simple_pipeline, launch_monitor):
-    h = ros.Header()
-    h.stamp = ros.Time.now()
-    launch_monitor('monitor-dl-watertank')
-    sensor_callback = CallBack(Float32Packet.to_formatted_string)
-    sensor_packets = [ Float32Packet( '/level_sensor', [x], sensor_callback)
-                         for x in [0.0, 0.0] ]
-
-    control_callback = CallBack(Float32StampedPacket.to_formatted_string)
-    control_packets = [ Float32StampedPacket( '/flow_control_cmd'
-                                            , [Float32Stamped(h, x)]
-                                            , control_callback)
-                            for x in [0.0, 0.7] ]
-
-    simple_pipeline( [ sensor_packets[0], control_packets[0]
-                   ,   sensor_packets[1], control_packets[1] ] )
-
-    rate = ros.Rate(10)
-    rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()
-
-    # Unsafe Control Changed to safe control
-    assert(['0.0', '0.0'] == control_callback.recieved_list)
-
-    # Sensor Readings Unchanged
-    assert(['0.0', '0.0'] == sensor_callback.recieved_list)
-
-@pytest.mark.dlTest
-def test_roscore__monitored_dl_watertank_safe_after_unsafe(simple_pipeline, launch_monitor):
-    h = ros.Header()
-    h.stamp = ros.Time.now()
-    launch_monitor('monitor-dl-watertank')
-    sensor_callback = CallBack(Float32Packet.to_formatted_string)
-    sensor_packets = [ Float32Packet( '/level_sensor', [x], sensor_callback)
-                           for x in [0.0, 0.0, 0.0] ]
-
-    control_callback = CallBack(Float32StampedPacket.to_formatted_string)
-    control_packets = [ Float32StampedPacket( '/flow_control_cmd'
-                                            , [Float32Stamped(h, x)]
-                                            , control_callback)
-                            for x in [0.0, 0.5, 0.1] ]
-
-    simple_pipeline( [ sensor_packets[0], control_packets[0]
-                     , sensor_packets[1], control_packets[1]
-                     , sensor_packets[2], control_packets[2] ])
-
-    rate = ros.Rate(10)
-    rate.sleep(); rate.sleep(); rate.sleep(); rate.sleep()
-
-    # Unsafe Control to safe (fallback) control and safe (blackbox) control
-    assert(['0.0', '0.0', '0.1'] == control_callback.recieved_list)
-
-    # Sensor Readings Unchanged
-    assert(['0.0', '0.0', '0.0'] == sensor_callback.recieved_list)
-
+    assert(['B', 'B'] == string_callback.recieved_list)
