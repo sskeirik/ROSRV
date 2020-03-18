@@ -22,7 +22,7 @@ export ROS_MASTER_URI="http://192.168.56.2:11311"
 source $DIR/devel/setup.bash
 
 [ -z "$1" ] && echo "=== Local test without rvmaster"
-[ -n "$1" ] && echo "=== Local test with rvmaster"
+[ -n "$1" ] && echo "=== Local test with rvmaster or unmonitored"
 
 echo "Starting listener..."
 rostopic echo "$TOPIC" &> "$DIR/listener.log" &
