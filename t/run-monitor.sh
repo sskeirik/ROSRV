@@ -1,14 +1,22 @@
 #! /bin/bash
 
+if [ "$#" -ne 1 ] && [ "$#" -ne 2 ]; then
+  echo "usage: run-monitor.sh <IP-A> [on]"
+  exit 1
+fi
+
 SHDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DIR="$( dirname $SHDIR )"
 
-export ROS_MASTER_URI="http://192.168.56.2:11311"
+IP_A=$1
+ON_STATE=$2
+
+export ROS_MASTER_URI="http://$IP_A:11311"
 
 # load the setup script
 source $DIR/devel/setup.bash
 
-if [ -z "$1" ]; then
+if [ -z "$ON_STATE" ]; then
   echo "=== Local test without rvmaster"
   echo "Starting monitor..."
   rosrun rvmonitor monitor-fixed-output  &> "$DIR/monitor.log"
